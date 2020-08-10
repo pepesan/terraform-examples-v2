@@ -1,0 +1,2 @@
+# Aquí va la clave SSH pública
+ssh_key="ssh-rsa XXX"

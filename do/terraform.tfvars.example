@@ -1,0 +1,4 @@
+# Change the token
+do_token="API_TOKEN"
+# Change the pub file location
+ssh_pub_path="/home/user/.ssh/id_rsa.pub"
