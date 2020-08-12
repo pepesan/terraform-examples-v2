@@ -64,30 +64,30 @@ resource "aws_security_group" "allow_ssh" {
   }
 }
 
-resource "aws_security_group" "allow_http" {
-  name        = "allow_http"
-  description = "Allow http inbound traffic"
-  vpc_id      = var.vpc_id
+  resource "aws_security_group" "allow_http" {
+    name        = "allow_http"
+    description = "Allow http inbound traffic"
+    vpc_id      = var.vpc_id
 
-  ingress {
-    description = "http from VPC"
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+    ingress {
+      description = "http from VPC"
+      from_port   = 80
+      to_port     = 80
+      protocol    = "tcp"
+      cidr_blocks = ["0.0.0.0/0"]
+    }
 
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+    egress {
+      from_port   = 0
+      to_port     = 0
+      protocol    = "-1"
+      cidr_blocks = ["0.0.0.0/0"]
+    }
 
-  tags = {
-    Name = "allow_http"
+    tags = {
+      Name = "allow_http"
+    }
   }
-}
 
 resource "aws_eip" "eip" {
   instance      = aws_instance.web.id
@@ -95,6 +95,10 @@ resource "aws_eip" "eip" {
   tags          = {
     Name        = "${var.project_name}-web-epi"
   }
+}
+
+data "template_file" "userdata" {
+  template = "${file("${path.module}/userdata.sh")}"
 }
 
 resource "aws_instance" "web" {
@@ -105,6 +109,7 @@ resource "aws_instance" "web" {
     aws_security_group.allow_ssh.id,
     aws_security_group.allow_http.id
   ]
+  user_data = "${data.template_file.userdata.rendered}"
   key_name      = aws_key_pair.deployer.key_name
   tags          = {
     Name = "${var.project_name}-web-instance"
@@ -124,6 +129,13 @@ output "instance_ip" {
 output "eip_ip" {
   description = "The eip ip for ssh access"
   value       = aws_eip.eip.public_ip
+}
+
+output "ssh" {
+  value = "ssh -l ubuntu ${aws_eip.eip.public_ip}"
+}
+output "url" {
+  value = "http://${aws_eip.eip.public_ip}/"
 }
 
 
