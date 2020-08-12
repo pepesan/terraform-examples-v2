@@ -1,9 +1,6 @@
-# Aquí va la clave SSH pública
-ssh_key="ssh-rsa XXX"
-# Nombre del proyecto
+ssh_key="ssh-rsa AAAAXXX== usuario@ejemplo.com"
 project_name="terraform"
-# Región
 region_name="eu-west-3"
 availability_zone="eu-west-3a"
-# VPC
-vpc_id="vpc-XXXX"
+vpc_id="vpc-xxxxxx"
+instance_type="t3.micro"
