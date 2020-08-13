@@ -37,6 +37,7 @@ resource "digitalocean_domain" "biblioteca-tech" {
 resource "digitalocean_record" "rancher" {
     domain = digitalocean_domain.biblioteca-tech.name
     type   = "A"
+    ttl = 120
     name   = var.rancher_dns_name
     value  = digitalocean_droplet.web.ipv4_address
 }

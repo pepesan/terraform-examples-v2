@@ -1,12 +1,12 @@
 data "aws_availability_zones" "available" {}
 
-locals {
-  cluster_name = "${var.project_name}-eks-${random_string.suffix.result}"
-}
-
 resource "random_string" "suffix" {
   length  = 8
   special = false
+}
+
+locals {
+  cluster_name = "${var.project_name}-eks-${random_string.suffix.result}"
 }
 
 module "vpc" {
@@ -28,11 +28,11 @@ module "vpc" {
 
   public_subnet_tags = {
     "kubernetes.io/cluster/${local.cluster_name}" = "shared"
-    "kubernetes.io/role/elb"                      = "1"
+    "kubernetes.io/role/elb-${local.cluster_name}"                      = "1"
   }
 
   private_subnet_tags = {
     "kubernetes.io/cluster/${local.cluster_name}" = "shared"
-    "kubernetes.io/role/internal-elb"             = "1"
+    "kubernetes.io/role/internal-elb-${local.cluster_name}"             = "1"
   }
 }
