@@ -13,4 +13,4 @@ echo "attempting to run: "
 echo "${docker_cmd}"
 # pendiente montar el volumen para el volumen de rancher
 # pendiente hacer que genere certificado ssl
-sudo ${docker_cmd}
+sudo ${docker_cmd} --acme-domain ${dns_name}
