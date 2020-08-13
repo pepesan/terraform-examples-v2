@@ -1,0 +1,6 @@
+# Change the token
+do_token="API_TOKEN"
+#Región de despliegue
+region="fra1"
+# Nombre del proyecto
+project_name = "demo"

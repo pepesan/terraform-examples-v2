@@ -1,0 +1,15 @@
+# Change the token
+do_token="API_TOKEN"
+# Change the pub file location
+ssh_pub_path="/home/user/.ssh/id_rsa.pub"
+#Región de despliegue
+region="fra1"
+# Nombre del proyecto
+project_name = "demo"
+
+node_count = 1
+droplet_size = "s-1vcpu-2gb"
+docker_cmd = "docker run -d --restart=unless-stopped -v /mnt/demo_web_volume:/var/lib/docker -p 80:80 -p 443:443 rancher/rancher:latest"
+instance_type = "node"
+hostname-prefix = "rancher"
+dns_name = "rancher.example.com"
