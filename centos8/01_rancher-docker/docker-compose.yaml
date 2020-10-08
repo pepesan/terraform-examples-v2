@@ -1,0 +1,14 @@
+version: '3.3'
+
+services:
+  rancher:
+    container_name: rancher
+    image: rancher/rancher:$RANCHER_VERSION
+    privileged: true
+    #volumes:
+    #  - ./volumes/rancher-data:/var/lib/rancher
+    command: --acme-domain $RANCHER_DNS_NAME
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
