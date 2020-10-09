@@ -1,6 +1,9 @@
 ## Installations Script
-* install.sh
 * docker-compose.yaml
+* install.sh
+  * ./install_docker_centos8.sh
+  * ./install_docker_compose.sh
+  * ./install_docker_compose_rancher.sh
 ## Rancher 2.5.0 Changes
 What's New in 2.5
 Cluster Explorer: New dashboard to provide a deeper look into clusters under management.
