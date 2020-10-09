@@ -5,7 +5,7 @@ Copy the .env.example file to .env
 cp .env.example .env
 * Modify to adapt to your needs
   * RANCHER_DFQN dns name of the server
-  * RANCHER_VERISION actually v2.5.0
+  * RANCHER_VERSION actually v2.5.0
   * DOCKER_COMPOSE_VERSION actually 1.25.0
   * CONTAINER_NAME actually for centos8 to check lxc instance
 ## Installations Script
