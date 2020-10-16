@@ -2,7 +2,7 @@
 source .env
 set -eux
 
-dnf install -y openssh-server
+dnf install -y openssh-server iptables
 systemctl start sshd
 systemctl status sshd
 

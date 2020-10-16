@@ -1,6 +1,7 @@
 #!/bin/bash
 source .env
 set -eux
+
 yum remove docker \
                   docker-client \
                   docker-client-latest \
@@ -15,7 +16,7 @@ yum-config-manager \
     --add-repo \
     https://download.docker.com/linux/centos/docker-ce.repo
 
-yum install -y docker-ce docker-ce-cli containerd.io
+yum install -y docker-ce-$DOCKER_PKG_VERSION docker-ce-cli-$DOCKER_PKG_VERSION containerd.io
 
 systemctl start docker
 systemctl enable docker
@@ -25,7 +26,8 @@ echo "Create a normal user for docker: $USERNAME"
 adduser $USERNAME
 passwd $USERNAME
 usermod -aG docker $USERNAME
-newgrp docker
+# Create rule to open input of 6443 for docker
+iptables -A INPUT -p tcp --dport 6443 -j ACCEPT
 echo "Log out and check if $USERNAME can access to docker: $ docker ps"
 exit
 

@@ -12,7 +12,6 @@ for node_name in $NODE_NAMES
     lxc exec $CONTAINER_NAME-$node_name nmcli device show eth0
 done
 
-dnf install openssh-server
 
 
 
