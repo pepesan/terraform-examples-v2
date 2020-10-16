@@ -9,5 +9,3 @@ for module in br_netfilter ip6_udp_tunnel ip_set ip_set_hash_ip ip_set_hash_net 
        fi;
 done
 
-# Open TCP/6443 for all
-iptables -A INPUT -p tcp --dport 6443 -j ACCEPT

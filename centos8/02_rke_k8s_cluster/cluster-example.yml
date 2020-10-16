@@ -1,54 +1,57 @@
 # If you intened to deploy Kubernetes in an air-gapped environment,
 # please consult the documentation on how to configure custom RKE images.
 nodes:
-- address: 10.105.28.146
-  port: "22"
-  internal_address: ""
-  role:
-  - controlplane
-  - worker
-  - etcd
-  hostname_override: node1
-  user: docker-admin
-  docker_socket: /var/run/docker.sock
-  ssh_key: ""
-  ssh_key_path: ~/.ssh/id_rke
-  ssh_cert: ""
-  ssh_cert_path: ""
-  labels: {}
-  taints: []
-- address: 10.105.28.180
-  port: "22"
-  internal_address: ""
-  role:
-  - controlplane
-  - worker
-  - etcd
-  hostname_override: node2
-  user: docker-admin
-  docker_socket: /var/run/docker.sock
-  ssh_key: ""
-  ssh_key_path: ~/.ssh/id_rke
-  ssh_cert: ""
-  ssh_cert_path: ""
-  labels: {}
-  taints: []
-- address: 10.105.28.215
-  port: "22"
-  internal_address: ""
-  role:
-  - controlplane
-  - worker
-  - etcd
-  hostname_override: ""
-  user: docker-admin
-  docker_socket: /var/run/docker.sock
-  ssh_key: ""
-  ssh_key_path: ~/.ssh/id_rke
-  ssh_cert: ""
-  ssh_cert_path: ""
-  labels: {}
-  taints: []
+  - address: NODE1_PUB_IP
+    port: "22"
+    internal_address: "NODE1_PRI_IP"
+    role:
+      - controlplane
+      - worker
+      - etcd
+    hostname_override: node1
+    user: docker-admin
+    ssh_agent_auth: true
+    docker_socket: /var/run/docker.sock
+    ssh_key: ""
+    ssh_key_path: /home/pepesan/.ssh/id_rke
+    ssh_cert: ""
+    ssh_cert_path: ""
+    labels: {}
+    taints: []
+  - address: NODE2_PUB_IP
+    port: "22"
+    internal_address: "NODE2_PRI_IP"
+    role:
+      - controlplane
+      - worker
+      - etcd
+    hostname_override: node2
+    user: docker-admin
+    ssh_agent_auth: true
+    docker_socket: /var/run/docker.sock
+    ssh_key: ""
+    ssh_key_path: /home/pepesan/.ssh/id_rke
+    ssh_cert: ""
+    ssh_cert_path: ""
+    labels: {}
+    taints: []
+  - address: NODE3_PUB_IP
+    port: "22"
+    internal_address: "NODE3_PRI_IP"
+    role:
+      - controlplane
+      - worker
+      - etcd
+    hostname_override: ""
+    user: docker-admin
+    ssh_agent_auth: true
+    docker_socket: /var/run/docker.sock
+    ssh_key: ""
+    ssh_key_path: /home/pepesan/.ssh/id_rke
+    ssh_cert: ""
+    ssh_cert_path: ""
+    labels: {}
+    taints: []
 services:
   etcd:
     image: ""
