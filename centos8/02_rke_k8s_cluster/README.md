@@ -20,6 +20,7 @@ cp .env.example .env
 * On Nodes: Check /home/$USERNAME/.ssh/authorized_keys
 * On Local: Check ssh access of $USERNAME to nodes with ssh key
 * On Local: ssh-add $SSH_KEY_PATH // add key to ssh agent
+* On Nodes: ./load_kernel_modules.sh // assure loading kernel modules 
 * On Local: Copy cluster-example.yml to cluster.yml
 * On Local: Modify cluster.yml file to include the node public and private ips
 * On Local: rke up --ssh-agent-auth // create the rke k8s cluster in nodes 
