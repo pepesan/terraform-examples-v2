@@ -4,3 +4,7 @@ do_token="API_TOKEN"
 region="fra1"
 # Nombre del proyecto
 project_name = "demo"
+# Node Count
+node_count=2
+# Machine size
+machine_size = "s-2vcpu-2gb"

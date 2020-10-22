@@ -1,21 +1,23 @@
 variable "do_token" {}
 variable "region" {}
 variable "project_name" {}
+variable "node_count" {}
+variable "machine_size" {}
 
 provider "digitalocean" {
     token = var.do_token
 }
-
+data "digitalocean_kubernetes_versions" "versions" {}
 
 resource "digitalocean_kubernetes_cluster" "cluster" {
     name    = "${var.project_name}-cluster"
     region  = var.region
-    version = "1.18.6-do.0"
+    version = data.digitalocean_kubernetes_versions.versions.latest_version
     tags    = ["testing"]
     node_pool {
         name       = "worker-pool"
-        size       = "s-2vcpu-2gb"
-        node_count = 1
+        size       = var.machine_size
+        node_count = var.node_count
     }
 }
 provider "kubernetes" {
@@ -39,5 +41,12 @@ output "token" {
 
 output "cert" {
     value = digitalocean_kubernetes_cluster.cluster.kube_config[0].cluster_ca_certificate
+}
+
+output "k8s_version" {
+    value = data.digitalocean_kubernetes_versions.versions.latest_version
+}
+output "kube_config" {
+    value = digitalocean_kubernetes_cluster.cluster.kube_config[0]
 }
 
