@@ -10,7 +10,7 @@ provider "digitalocean" {
 # Create a new SSH key
 resource "digitalocean_ssh_key" "web-ssh" {
     name       = "${var.project_name}-key"
-    public_key = file("${var.ssh_pub_path}")
+    public_key = file(var.ssh_pub_path)
 }
 
 

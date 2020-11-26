@@ -30,12 +30,12 @@ data "template_file" "userdata" {
     })
 }
 # consulta del dominio en DO
-resource "digitalocean_domain" "biblioteca-tech" {
+data "digitalocean_domain" "biblioteca-tech" {
     name = "biblioteca.tech"
 }
 # creación del registro dns A para el servidor
 resource "digitalocean_record" "rancher" {
-    domain = digitalocean_domain.biblioteca-tech.name
+    domain = data.digitalocean_domain.biblioteca-tech.name
     type   = "A"
     ttl = 120
     name   = var.rancher_dns_name
@@ -69,7 +69,7 @@ resource "digitalocean_volume_attachment" "web" {
 }
  
 output "ip" {
-    value = "${digitalocean_droplet.web.ipv4_address}"
+    value = digitalocean_droplet.web.ipv4_address
 }
 output "ssh" {
     value = "ssh -l root ${digitalocean_droplet.web.ipv4_address}"

@@ -1,0 +1,4 @@
+k8s_host = "https://HOST"
+k8s_token = "TOKEN"
+k8s_ca_cert = "CA_CERT"
+lets_encrypt_email = "pepesan@gmail.com"
