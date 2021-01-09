@@ -1,7 +1,7 @@
 # Ejemplo de uso de Terraform 01_simple_vps
 En este ejemplo crearemos una máquina en ec2 simple con una clave SSH
 
-# Configuración de AWS CLI
+# Configuración de DigitalOcean CLI
 [Tenemos una guía para poder gestionar las credenciales de Digital Ocean](https://cursosdedesarrollo.com/2020/08/infraestructura-uso-de-terraform-instalacion-y-configuraciones-basicas/)
 # Copia el fichero terraform.tfvars.examples
 <code>cp terraform.tfvars.example terraform.tfvars</code>

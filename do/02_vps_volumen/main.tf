@@ -15,7 +15,7 @@ resource "digitalocean_ssh_key" "web-ssh" {
 
 
 data "template_file" "userdata" {
-    template = "${file("${path.module}/userdata.sh")}"
+    template = file("${path.module}/userdata.sh")
 }
 
 resource "digitalocean_droplet" "web" {
@@ -24,7 +24,7 @@ resource "digitalocean_droplet" "web" {
     region = var.region
     size   = "s-1vcpu-1gb"
     backups = true
-    user_data = "${data.template_file.userdata.rendered}"
+    user_data = data.template_file.userdata.rendered
     ssh_keys = [digitalocean_ssh_key.web-ssh.fingerprint]
 }
 
@@ -42,19 +42,19 @@ resource "digitalocean_volume_attachment" "web" {
 }
  
 output "ip" {
-    value = "${digitalocean_droplet.web.ipv4_address}"
+    value = digitalocean_droplet.web.ipv4_address
 }
 output "ssh" {
     value = "ssh -l root ${digitalocean_droplet.web.ipv4_address}"
 }
 output "ram" {
-    value = "${digitalocean_droplet.web.size}"
+    value = digitalocean_droplet.web.size
 }
 output "vps-disk" {
-    value = "${digitalocean_droplet.web.disk}"
+    value = digitalocean_droplet.web.disk
 }
 output "volume_disk" {
-    value = "${digitalocean_volume.web.size}"
+    value = digitalocean_volume.web.size
 }
 
 

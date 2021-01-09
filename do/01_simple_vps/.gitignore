@@ -1,1 +1,4 @@
 terraform.tfstate.lock.info
+terraform.tfstate
+terraform.tfvars
+.terraform

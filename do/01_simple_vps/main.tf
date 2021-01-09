@@ -1,8 +1,6 @@
 variable "do_token" {}
 variable "ssh_pub_path"{}
-variable "droplet_image" {
-
-}
+variable "droplet_image" {}
 
 provider "digitalocean" {
     token = var.do_token
