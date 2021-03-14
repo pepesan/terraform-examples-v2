@@ -51,13 +51,29 @@ resource "digitalocean_volume_attachment" "docker" {
     volume_id  = digitalocean_volume.docker.id
 }
 
+data "digitalocean_images" "available" {
+    filter {
+        key    = "distribution"
+        values = ["Ubuntu"]
+    }
+    filter {
+        key    = "regions"
+        values = [var.region]
+    }
+    sort {
+        key       = "created"
+        direction = "desc"
+    }
+}
+
 output "docker-vps-data"{
     value = {
         ip = digitalocean_droplet.docker.ipv4_address,
         machine_template = digitalocean_droplet.docker.size
         vps_disk = digitalocean_droplet.docker.disk
         volume_disk = digitalocean_volume.docker.size,
-        ssh_line =  "ssh -l root ${digitalocean_droplet.docker.ipv4_address}"
+        ssh_line =  "ssh -l root ${digitalocean_droplet.docker.ipv4_address}",
+        //ubuntu_images = data.digitalocean_images.available.images
     }
 }
 

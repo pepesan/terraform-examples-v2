@@ -1,2 +1,3 @@
 # Aquí va la clave SSH pública
-ssh_key="ssh-rsa XXX"
+ssh_key="ruta fichero ssh.pub"
+vpc_id="vpc-XXXXXX"

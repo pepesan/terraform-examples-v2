@@ -1,3 +1,4 @@
+variable "ssh_key_path" {}
 variable "project_name" {}
 variable "region_name" {}
 variable "availability_zone" {}
@@ -24,17 +25,18 @@ data "aws_ami" "ubuntu" {
   owners      = ["099720109477"] # Canonical
 }
 
-variable "ssh_key" {}
 
-resource "aws_key_pair" "deployer" {
+resource "aws_key_pair" "deployer-key" {
   key_name      = "${var.project_name}-deployer-key"
-  public_key    = var.ssh_key
+  public_key    = file(var.ssh_key_path)
 }
 
 
 resource "aws_ebs_volume" "web" {
   availability_zone = var.availability_zone
   size              = 4
+  type = "gp3"
+  encrypted =   true
   tags = {
     Name = "${var.project_name}-web-ebs"
   }
@@ -64,7 +66,7 @@ resource "aws_security_group" "allow_ssh" {
   }
 }
 
-  resource "aws_security_group" "allow_http" {
+resource "aws_security_group" "allow_http" {
     name        = "allow_http"
     description = "Allow http inbound traffic"
     vpc_id      = var.vpc_id
@@ -89,16 +91,10 @@ resource "aws_security_group" "allow_ssh" {
     }
   }
 
-resource "aws_eip" "eip" {
-  instance      = aws_instance.web.id
-  vpc           = true
-  tags          = {
-    Name        = "${var.project_name}-web-epi"
-  }
-}
 
+// 16kB tamaño maximo
 data "template_file" "userdata" {
-  template = "${file("${path.module}/userdata.sh")}"
+  template = file("${path.module}/userdata.sh")
 }
 
 resource "aws_instance" "web" {
@@ -109,13 +105,20 @@ resource "aws_instance" "web" {
     aws_security_group.allow_ssh.id,
     aws_security_group.allow_http.id
   ]
-  user_data = "${data.template_file.userdata.rendered}"
-  key_name      = aws_key_pair.deployer.key_name
+  user_data = data.template_file.userdata.rendered
+  key_name      = aws_key_pair.deployer-key.key_name
   tags          = {
     Name = "${var.project_name}-web-instance"
   }
 }
 
+resource "aws_eip" "eip" {
+  instance      = aws_instance.web.id
+  vpc           = true
+  tags          = {
+    Name        = "${var.project_name}-web-epi"
+  }
+}
 resource "aws_volume_attachment" "web" {
   device_name = "/dev/sdh"
   volume_id   = aws_ebs_volume.web.id

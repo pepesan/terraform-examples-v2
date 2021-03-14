@@ -1,4 +1,4 @@
-ssh_key="ssh-rsa AAAAXXX== usuario@ejemplo.com"
+ssh_key_path="/home/usuario/.ssh/id_rsa.pub"
 project_name="terraform"
 region_name="eu-west-3"
 availability_zone="eu-west-3a"

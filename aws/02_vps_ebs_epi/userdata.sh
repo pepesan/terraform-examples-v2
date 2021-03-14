@@ -7,6 +7,7 @@ sudo apt-get -y install nginx
 sudo mkfs -t xfs /dev/nvme1n1
 sudo mkdir /mnt/demo_web_volume
 sudo mount /dev/nvme1n1 /mnt/demo_web_volume
+echo "/dev/nvme1n1  /mnt/demo_web_volume    xfs   defaults 0 2" >> /etc/fstab
 sudo rm -rf /var/www/html
 sudo mkdir /mnt/demo_web_volume/html
 sudo ln -s /mnt/demo_web_volume/html /var/www/html
