@@ -12,3 +12,4 @@ docker_user = "duser"
 device_path = "/dev/disk/by-id/scsi-0DO_Volume_docker-demo-docker-volume"
 # Volume Mount Path
 mount_path = "/var/lib/docker"
+droplet_size = "s-4vcpu-8gb"

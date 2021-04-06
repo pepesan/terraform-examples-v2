@@ -17,11 +17,18 @@ sudo apt install -y apt-transport-https ca-certificates curl software-properties
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
 sudo add-apt-repository -y "deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable"
 sudo apt install -y docker-ce
+qq
+
 # Docker User manage
 sudo groupadd -g 1000 ${DOCKER_USER}
 sudo useradd -d /home/${DOCKER_USER} -s /bin/bash -u 1000 -g 1000 ${DOCKER_USER}
 sudo mkdir /home/${DOCKER_USER}
 sudo chown -R ${DOCKER_USER}:${DOCKER_USER} /home/${DOCKER_USER}
 sudo usermod -aG docker ${DOCKER_USER}
+
+sudo curl -L "https://github.com/docker/compose/releases/download/1.28.6/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose
+sudo ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
+
 # Reboot
 #sudo reboot
