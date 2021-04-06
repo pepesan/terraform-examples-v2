@@ -1,0 +1,31 @@
+version: '3.5'
+services:
+  gitlab:
+    image: gitlab/gitlab-ce:latest
+    #hostmane: mordor.cursosdedesarrollo.com
+    restart: unless-stopped
+    environment:
+      GITLAB_OMNIBUS_CONFIG: |
+        gitlab_rails['gitlab_shell_ssh_port'] = 8822
+
+    ports:
+      - "10080:80"
+      - "10022:22"
+    volumes:
+      - ./volumes/config:/etc/gitlab
+      - ./volumes/data:/var/opt/gitlab
+      - ./volumes/logs:/var/log/gitlab
+    networks:
+      - gitlab
+  gitlab-runner:
+    image: gitlab/gitlab-runner:alpine
+    restart: unless-stopped
+    depends_on:
+      - gitlab
+    volumes:
+      - ./volumes/config-runner:/etc/gitlab-runner
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - gitlab
+networks:
+  gitlab:
