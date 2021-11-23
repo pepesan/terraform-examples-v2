@@ -1,0 +1,90 @@
+version: "3"
+services:
+  jenkins:
+    image: jenkinsci/blueocean
+    privileged: true
+    networks:
+      - sonarnet
+    container_name: jenkins
+    environment:
+      - DOCKER_HOST=tcp://localhost:2375
+      - JENKINS_UC=http://updates.jenkins.io
+      - JENKINS_UC_EXPERIMENTAL=http://updates.jenkins.io/experimental
+      - JENKINS_INCREMENTALS_REPO_MIRROR=http://repo.jenkins-ci.org/incrementals
+    user: root
+    ports:
+      - "8080:8080"
+      - "8443:8443"
+      - "50000:50000"
+    expose:
+      - "8080"
+    volumes:
+      - jenkins-data:/var/jenkins_home
+      - jenkins-home:/home
+      - /var/run/docker.sock:/var/run/docker.sock
+        #- /usr/bin/docker:/usr/local/bin/docker
+        #- /usr/local/bin/docker-compose:/usr/local/bin/docker-compose
+
+
+  jenkins-slave:
+    container_name: jenkins-slave
+    restart: always
+    environment:
+      - 'JENKINS_URL=http://jenkins:8080'
+    image: jenkins/agent
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock  # Expose the docker daemon in the container
+    depends_on:
+      - jenkins
+    command: java -jar /usr/share/jenkins/agent.jar
+  nexus:
+    image: sonatype/nexus3
+    networks:
+      - sonarnet
+    container_name: nexus
+    volumes:
+      - "nexus-data:/nexus-data"
+    ports:
+      - "8081:8081"
+    expose:
+      - "8081"
+
+  sonarqube:
+    image: sonarqube
+    networks:
+      - sonarnet
+    container_name: sonarqube
+    ports:
+      - "9001:9000"
+    environment:
+      - SONARQUBE_JDBC_URL=jdbc:postgresql://db:5432/sonar
+      - SONARQUBE_JDBC_USERNAME=sonar
+      - SONARQUBE_JDBC_PASSWORD=sonar
+    volumes:
+      - ./volumes/sonarqube_conf:/opt/sonarqube/conf
+      - ./volumes/sonarqube_data:/opt/sonarqube/data
+      - ./volumes/sonarqube_extensions:/opt/sonarqube/extensions
+
+  db:
+    image: postgres
+    networks:
+      - sonarnet
+    environment:
+      - POSTGRES_USER=sonar
+      - POSTGRES_PASSWORD=sonar
+    volumes:
+      - postgresql:/var/lib/postgresql
+      # This needs explicit mapping due to https://github.com/docker-library/postgres/blob/4e48e3228a30763913ece952c611e5e9b95c8759/Dockerfile.template#L52
+      - postgresql_data:/var/lib/postgresql/data
+networks:
+  sonarnet:
+    driver: bridge
+volumes:
+  nexus-data: {}
+  jenkins-data: {}
+  jenkins-home: {}
+  sonarqube_conf: {}
+  sonarqube_data: {}
+  sonarqube_extensions: {}
+  postgresql: {}
+  postgresql_data: {}
