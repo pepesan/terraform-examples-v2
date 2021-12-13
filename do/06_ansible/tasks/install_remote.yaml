@@ -1,0 +1,52 @@
+---
+- hosts: remote
+  name: Install Nginx in Remote server
+  vars:
+    - gpg_repository_key: https://apt.releases.hashicorp.com/gpg
+    - repo_deb: "deb [arch=amd64] https://apt.releases.hashicorp.com"
+    - linux_distribution: Ubuntu
+    - distribution_release: focal
+  tasks:
+    - name: Instalando nginx
+      apt:
+        name: nginx
+        state: latest
+    - name: Servicio arrancado
+      service:
+        name: nginx
+        state: started
+        enabled: true
+    - name: Instalando elinks
+      apt:
+        name: elinks
+        state: latest
+    - name: Habilitar UFW
+      ufw:
+        state: enabled
+        policy: deny
+    - name: Habilitar el log
+      ufw:
+        logging: 'on'
+    - name: abrir el firewall para 22
+      ufw:
+        rule: allow
+        port: "22"
+        proto: tcp
+    - name: abrir el firewall para 80
+      ufw:
+        rule: allow
+        port: "80"
+        proto: tcp
+    - name: abrir el firewall para 443
+      ufw:
+        rule: allow
+        port: "443"
+        proto: tcp
+    - name: Copia el fichero index.html
+      ansible.builtin.copy:
+        src: ../index.html
+        dest: /var/www/html/index.html
+        owner: www-data
+        group: www-data
+        mode: '0644'
+...

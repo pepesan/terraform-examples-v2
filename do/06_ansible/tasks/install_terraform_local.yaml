@@ -1,0 +1,33 @@
+---
+- hosts: local
+  name: Install Ansible in Localhost
+  vars:
+    - gpg_repository_key: https://apt.releases.hashicorp.com/gpg
+    - repo_deb: "deb [arch=amd64] https://apt.releases.hashicorp.com"
+    - linux_distribution: Ubuntu
+    - distribution_release: focal
+  tasks:
+    - name: Update repositories
+      package: update_cache=yes
+      ignore_errors: yes
+    - name: Install requirements
+      package:
+        name:
+          - gnupg
+          - software-properties-common
+          - curl
+        state: latest
+    - name: Add Repository Key
+      apt_key:
+        url: "{{gpg_repository_key}}"
+        state: present
+    - name: Add specified repository into sources list
+      ansible.builtin.apt_repository:
+        repo: "{{ repo_deb }} {{ distribution_release }}  main"
+        state: present
+        filename: terraform
+    - name: Install terraform
+      package:
+        name: terraform
+        state: latest
+...
