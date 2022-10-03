@@ -1,3 +1,5 @@
+# Fichero .gitignore
+.env
 .idea
 .terraform
 .terraform.*

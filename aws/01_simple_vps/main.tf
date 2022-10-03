@@ -18,8 +18,12 @@ data "aws_ami" "ubuntu" {
   owners = ["099720109477"] # Canonical
 }
 
-variable "ssh_key_path" {}
-variable "vpc_id" {}
+variable "ssh_key_path" {
+  type = string
+}
+variable "vpc_id" {
+  type = string
+}
 
 resource "aws_key_pair" "deployer" {
   key_name   = "deployer-key"
