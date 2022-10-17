@@ -1,0 +1,6 @@
+# Aquí va la clave SSH pública
+ssh_key_path="/home/xxx/.ssh/id_rsa.pub"
+# Aquí va el ID de la VPC
+vpc_id="vpc-xxx"
+# Aquí va la zona de disponibilidad
+availability_zone="eu-west-3a"
