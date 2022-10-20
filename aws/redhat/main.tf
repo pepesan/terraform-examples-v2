@@ -77,7 +77,7 @@ data "aws_ami" "rhel_8_5" {
   owners = ["309956199498"] // Red Hat's Account ID
   filter {
     name   = "name"
-    values = ["RHEL-8.5*"]
+    values = ["RHEL-9.0*"]
   }
   filter {
     name   = "architecture"
