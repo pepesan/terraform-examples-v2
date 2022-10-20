@@ -130,11 +130,28 @@ resource "aws_volume_attachment" "web" {
   instance_id = aws_instance.web.id
 }
 
+resource "aws_eip" "eip" {
+  instance      = aws_instance.web.id
+  vpc           = true
+  tags          = {
+    Name        = "web-epi"
+  }
+}
+
 output "ip_instance" {
   value = aws_instance.web.public_ip
+}
+
+output "eip_ip" {
+  description = "The eip ip for ssh access"
+  value       = aws_eip.eip.public_ip
 }
 
 output "ssh" {
   value = "ssh -l ec2-user ${aws_instance.web.public_ip}"
 }
+output "ssh_eip" {
+  value = "ssh -l ec2-user ${aws_eip.eip.public_ip}"
+}
+
 
