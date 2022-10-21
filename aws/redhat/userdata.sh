@@ -5,9 +5,10 @@ export PATH="$PATH:/usr/bin"
 # formateo de volumen
 sudo mkfs -t xfs /dev/nvme1n1
 # creación carpeta
-mkdir /usr/share/nginx/html
+mkdir -p /usr/share/nginx/html
 # montaje
-echo "/dev/nvme1n1  /usr/share/nginx/html  xfs  defaults,nofail  0  2" >> sudo tee /etc/fstab
+sudo sh -c 'echo UUID=`lsblk -no UUID /dev/nvme1n1` /usr/share/nginx/html xfs defaults,nofail 0 2 >> /etc/fstab'
+#echo "/dev/nvme1n1  /usr/share/nginx/html  xfs  defaults,nofail  0  2" >> sudo tee /etc/fstab
 sudo mount /dev/nvme1n1 /usr/share/nginx/html
 
 # Instalar servidor Web
