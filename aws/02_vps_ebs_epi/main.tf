@@ -138,7 +138,7 @@ output "ssh" {
   value = "ssh -l ubuntu ${aws_eip.eip.public_ip}"
 }
 output "url" {
-  value = "http://${aws_eip.eip.public_ip}/"
+  value = "https://${aws_eip.eip.public_ip}/"
 }
 
 

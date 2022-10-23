@@ -2,5 +2,9 @@
 ssh_key_path="/home/xxx/.ssh/id_rsa.pub"
 # Aquí va el ID de la VPC
 vpc_id="vpc-xxx"
+# Aquí va el ID de la VPC
+vpc_id="vpc-c2df3aaa"
 # Aquí va la zona de disponibilidad
-availability_zone="eu-west-3a"
+availability_zone="us-east-2a"
+# Puerto del servidor
+server_port = 8080
