@@ -13,7 +13,10 @@ Edita el fichero terraform.tfvars y pon tus propios valores, sobre todo el vpc_i
 <code>$ terraform plan</code>
 # Despliegue de la infraestructura
 <code>$ terraform apply</code>
-# Conexión SSH
-<code>ssh -l ubuntu EIP</code>
+# Recogida de configuración para el kubectl
+<code>aws eks --region $(terraform output -raw region) update-kubeconfig \
+--name $(terraform output -raw cluster_name)</code>
+# Primera llamada del kubectl
+<code>kubectl cluster-info</code>
 # Destrucción de la infraestructura
 <code>$ terraform destroy</code>

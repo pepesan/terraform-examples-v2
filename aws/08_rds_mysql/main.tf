@@ -65,7 +65,7 @@ resource "aws_db_instance" "rds" {
   identifier = "rds-terraform"
   storage_type = "gp2"
   engine = "mysql"
-  engine_version = "8.0.27"
+  engine_version = "8.0.30"
   instance_class = "db.t2.micro"
   db_name = "mydb"
   username = "admin"
