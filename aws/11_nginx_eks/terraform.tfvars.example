@@ -1,0 +1,5 @@
+region="eu-west-3"
+# Aquí va la clave SSH pública
+ssh_key_path="/ruta/id_rsa.pub"
+# Aquí va el ID de la VPC
+vpc_id="vpc-XXXX"
