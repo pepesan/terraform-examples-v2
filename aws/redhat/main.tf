@@ -72,7 +72,7 @@ resource "aws_security_group" "allow_ports" {
 }
 
 # RHEL 8.5
-data "aws_ami" "rhel_8_5" {
+data "aws_ami" "rhel_9" {
   most_recent = true
   owners = ["309956199498"] // Red Hat's Account ID
   filter {
@@ -112,7 +112,7 @@ data "template_file" "userdata" {
 }
 
 resource "aws_instance" "web" {
-  ami           = data.aws_ami.rhel_8_5.id
+  ami           = data.aws_ami.rhel_9.id
   availability_zone = var.availability_zone
   instance_type = "t3.micro"
   key_name               = aws_key_pair.deployer.key_name

@@ -21,12 +21,15 @@ data "aws_ami" "ubuntu" {
 variable "ssh_key_path" {
   type = string
 }
+variable "ssh_key_private_path" {
+  type = string
+}
 variable "vpc_id" {
   type = string
 }
 
 resource "aws_key_pair" "deployer" {
-  key_name   = "deployer-key"
+  key_name   = "deployer-key-ubuntu"
   public_key = file(var.ssh_key_path)
 }
 
@@ -64,6 +67,22 @@ resource "aws_instance" "web" {
   ]
   tags = {
     Name = "HelloWorld"
+  }
+  # ejecución de comandos desde la maquina que lanza terraform
+  provisioner "local-exec" {
+    command = "echo The ssh id is ${self.id}"
+  }
+  connection {
+    type = "ssh"
+    user = "ubuntu"
+    host = self.public_ip
+    private_key = file(var.ssh_key_private_path)
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "echo hola >> fichero.txt"
+    ]
   }
 }
 
