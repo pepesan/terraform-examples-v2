@@ -138,6 +138,10 @@ resource "aws_eip" "eip" {
   }
 }
 
+output "vpc_id" {
+  value = module.vpc.vpc_id
+}
+
 output "ip_instance" {
   value = aws_instance.web.public_ip
 }
