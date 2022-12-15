@@ -9,6 +9,6 @@ module "llamada" {
   
 }
 
-output "salida" {
+output "salida-main" {
   value =module.llamada.salida
 }

@@ -5,6 +5,8 @@ provider "aws" {
 }
 # variable path clave ssh
 variable "ssh_key_path" {}
+# variable path clave ssh
+variable "ssh_public_key" {}
 # variable del Id de la VPC
 variable "vpc_id" {}
 
@@ -29,7 +31,7 @@ module "vpc" {
 # Recurso de clave SSH en AWS
 resource "aws_key_pair" "deployer" {
   key_name   = "deployer-key"
-  public_key = file(var.ssh_key_path)
+  public_key = var.ssh_public_key
 }
 
 resource "aws_security_group" "allow_ports" {
@@ -108,8 +110,12 @@ resource "aws_ebs_volume" "web" {
 }
 
 // 16kB tamaño maximo
+variable "user_data_content" {
+  default = ""
+}
 data "template_file" "userdata" {
-  template = file("${path.module}/userdata.sh")
+  #template = file("${path.module}/userdata.sh")
+  template =var.user_data_content
 }
 
 resource "aws_instance" "web" {
