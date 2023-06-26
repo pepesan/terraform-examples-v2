@@ -1,0 +1,7 @@
+# Fichero .gitignore
+.env
+.idea
+.terraform
+.terraform.*
+terraform.tfstate*
+terraform.tfvars

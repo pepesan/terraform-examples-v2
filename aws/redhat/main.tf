@@ -4,7 +4,12 @@ provider "aws" {
   region = "eu-west-3"
 }
 # variable path clave ssh
-variable "ssh_key_path" {}
+variable "ssh_key_path" {
+  validation {
+    condition = var.ssh_key_path!= null
+    error_message = "The ssh path must be to the public ssh key file path."
+  }
+}
 # variable del Id de la VPC
 variable "vpc_id" {}
 
