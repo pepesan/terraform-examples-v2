@@ -33,7 +33,7 @@ resource "aws_key_pair" "deployer" {
   public_key = file(var.ssh_key_path)
 }
 
-resource "aws_security_group" "allow_ssh" {
+resource "aws_security_group" "allow_rke_ssh" {
   name        = "allow_ssh"
   description = "Allow SSH inbound traffic"
   vpc_id      = var.vpc_id
@@ -72,15 +72,25 @@ resource "aws_security_group" "allow_ssh" {
   }
 }
 
+// 16kB tamaño maximo
+data "template_file" "userdata" {
+  template = file("${path.module}/userdata.sh")
+}
+
 resource "aws_instance" "web" {
+  count         = 3
   ami           = data.aws_ami.ubuntu.id
   instance_type = "t3.micro"
   key_name = aws_key_pair.deployer.key_name
+  user_data              = data.template_file.userdata.rendered
   vpc_security_group_ids = [
-    aws_security_group.allow_ssh.id
+    aws_security_group.allow_rke_ssh.id
   ]
   tags = {
-    Name = "HelloWorld"
+    Name = "rke-instance-${count.index}"
+  }
+  root_block_device {
+    volume_size = 20
   }
   # ejecución de comandos desde la maquina que lanza terraform
   provisioner "local-exec" {
@@ -100,10 +110,14 @@ resource "aws_instance" "web" {
   }
 }
 
-output "ip_instance" {
-  value = aws_instance.web.public_ip
+output "ips_instance" {
+  value = aws_instance.web[*].public_ip
 }
 
-output "ssh" {
-  value = "ssh -l ubuntu ${aws_instance.web.public_ip}"
+#output "ssh" {
+#  value = "ssh -l ubuntu ${aws_instance.web.public_ip}"
+#}
+
+output "ssh_with_public_ips" {
+  value = [for instance in aws_instance.web : "ssh ubuntu@${instance.public_ip}"]
 }
