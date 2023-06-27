@@ -33,7 +33,7 @@ resource "aws_key_pair" "deployer" {
   public_key = file(var.ssh_key_path)
 }
 
-resource "aws_security_group" "allow_rke_ssh" {
+resource "aws_security_group" "allow_rke_server_agent" {
   name        = "allow_ssh"
   description = "Allow SSH inbound traffic"
   vpc_id      = var.vpc_id
@@ -64,7 +64,7 @@ resource "aws_security_group" "allow_rke_ssh" {
     from_port   = 8472
     to_port     = 8472
     protocol    = "udp"
-    description = "RKE2 server and agent nodes, Required only for Flannel VXLAN and Cilium CNI VXLAN"
+    description = "RKE2 server and agent nodes, Required for Canal CNI with VXLAN, Flannel VXLAN and Cilium CNI VXLAN"
     cidr_blocks = ["0.0.0.0/0"]
   }
   ingress {
@@ -93,13 +93,6 @@ resource "aws_security_group" "allow_rke_ssh" {
     to_port     = 32767
     protocol    = "tcp"
     description = "NodePort port range (RKE2 server and agent nodes)"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-  ingress {
-    from_port   = 4240
-    to_port     = 4240
-    protocol    = "tcp"
-    description = "RKE2 server and agent nodes, Cilium CNI health checks"
     cidr_blocks = ["0.0.0.0/0"]
   }
   ingress {
@@ -151,20 +144,7 @@ resource "aws_security_group" "allow_rke_ssh" {
     description = "RKE2 server and agent nodes, Calico health checks and Canal CNI health checks"
     cidr_blocks = ["0.0.0.0/0"]
   }
-  ingress {
-    from_port   = 5473
-    to_port     = 5473
-    protocol    = "tcp"
-    description = "RKE2 server and agent nodes, Calico CNI with Typha"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-  ingress {
-    from_port   = 8472
-    to_port     = 8472
-    protocol    = "udp"
-    description = "RKE2 server and agent nodes, Canal CNI with VXLAN"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+
   ingress {
     from_port   = 51820
     to_port     = 51820
@@ -224,7 +204,7 @@ resource "aws_instance" "rke_server" {
   key_name = aws_key_pair.deployer.key_name
   user_data              = data.template_file.userdata_server.rendered
   vpc_security_group_ids = [
-    aws_security_group.allow_rke_ssh.id
+    aws_security_group.allow_rke_server_agent.id
   ]
   tags = {
     Name = "rke-server-instance-${count.index}"
@@ -258,7 +238,7 @@ resource "aws_instance" "rke_agent" {
   key_name = aws_key_pair.deployer.key_name
   user_data              = data.template_file.userdata_agent.rendered
   vpc_security_group_ids = [
-    aws_security_group.allow_rke_ssh.id
+    aws_security_group.allow_rke_server_agent.id
   ]
   tags = {
     Name = "rke-agent-instance-${count.index}"
