@@ -8,6 +8,6 @@ sudo apt install -y git python3-pip ansible
 pip3 install ansible
 git clone https://github.com/pepesan/ejemplos-ansible.git
 cd ejemplos-ansible/27_rke
-ansible-playbook rke_node_install.yaml
+ansible-playbook rke_node_agent_install.yaml
 
 
