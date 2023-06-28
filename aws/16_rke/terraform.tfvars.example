@@ -1,0 +1,4 @@
+# Aquí va la clave SSH pública
+ssh_key_path="/ruta/id_rsa.pub"
+ssh_key_private_path="/ruta/id_rsa"
+vpc_id="vpc-xxxxx"

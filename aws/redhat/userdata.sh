@@ -2,6 +2,7 @@
 set -x
 exec > >(tee /var/log/user-data.log|logger -t user-data -s 2>/dev/console) 2>&1
 export PATH="$PATH:/usr/bin"
+sleep 100
 # formateo de volumen
 sudo mkfs -t xfs /dev/nvme1n1
 # creación carpeta
