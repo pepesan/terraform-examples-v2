@@ -28,13 +28,15 @@ variable "vpc_id" {
   type = string
 }
 
+variable "project_name" {}
+
 resource "aws_key_pair" "deployer" {
-  key_name   = "deployer-key-ubuntu"
+  key_name   = "deployer-key-ubuntu-${var.project_name}"
   public_key = file(var.ssh_key_path)
 }
 
 resource "aws_security_group" "allow_ssh" {
-  name        = "allow_ssh"
+  name        = "allow_ssh-${var.project_name}"
   description = "Allow SSH inbound traffic"
   vpc_id      = var.vpc_id
 
@@ -66,7 +68,7 @@ resource "aws_instance" "web" {
     aws_security_group.allow_ssh.id
   ]
   tags = {
-    Name = "HelloWorld"
+    Name = "HelloWorld-${var.project_name}"
   }
   # ejecución de comandos desde la maquina que lanza terraform
   provisioner "local-exec" {
