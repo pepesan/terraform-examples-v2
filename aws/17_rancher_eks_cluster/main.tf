@@ -1,5 +1,4 @@
-variable "project_name" {}
-variable "region" {}
+
 
 provider "aws" {
   region      = var.region

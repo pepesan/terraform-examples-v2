@@ -45,6 +45,33 @@ resource "aws_security_group" "allow_rke_server_agent" {
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
+
+  ingress {
+    description = "HTTP from VPC"
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  ingress {
+    description = "HTTPs from VPC"
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "allow_ssh"
+  }
+
   ingress {
     from_port   = 9345
     to_port     = 9345
@@ -159,31 +186,7 @@ resource "aws_security_group" "allow_rke_server_agent" {
     description = "RKE2 server and agent nodes, Canal CNI with WireGuard IPv6/dual-stack"
     cidr_blocks = ["0.0.0.0/0"]
   }
-  ingress {
-    description = "HTTP from VPC"
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-  ingress {
-    description = "HTTPs from VPC"
-    from_port   = 443
-    to_port     = 443
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
 
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags = {
-    Name = "allow_ssh"
-  }
 }
 
 // 16kB tamaño maximo
@@ -231,6 +234,7 @@ resource "aws_instance" "rke_server" {
 }
 
 resource "aws_instance" "rke_agent" {
+  depends_on = [aws_instance.rke_server]
   count         = 2
   ami           = data.aws_ami.ubuntu.id
   instance_type = "t3.large"
