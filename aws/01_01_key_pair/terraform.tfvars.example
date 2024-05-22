@@ -1,0 +1,3 @@
+# Aquí va la clave SSH pública
+ssh_key_path="ruta fichero ssh.pub"
+project_name="terraform"

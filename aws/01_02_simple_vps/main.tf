@@ -10,6 +10,10 @@ data "aws_ami" "ubuntu" {
     # values = ["ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-*"]
     values = ["ubuntu/images/hvm-ssd-gp3/ubuntu-noble-24.04-amd64-server-*"]
   }
+  filter {
+    name   = "root-device-type"
+    values = ["ebs"]
+  }
 
   filter {
     name   = "virtualization-type"
@@ -29,7 +33,10 @@ variable "vpc_id" {
   type = string
 }
 
-variable "project_name" {}
+variable "project_name" {
+  type = string
+  default = "profe"
+}
 
 resource "aws_key_pair" "deployer" {
   key_name   = "deployer-key-ubuntu-${var.project_name}"
