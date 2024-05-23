@@ -1,9 +1,9 @@
 resource "aws_db_instance" "rds" {
   allocated_storage = 20
-  identifier = "rds-terraform"
+  identifier = "${var.project_name}-rds"
   storage_type = "gp3"
   engine = "mysql"
-  engine_version = "8.0.35"
+  engine_version = "8.0.36"
   instance_class = "db.t3.micro"
   db_name = "mydb"
   username = "admin"
