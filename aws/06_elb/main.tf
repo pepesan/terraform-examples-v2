@@ -180,34 +180,12 @@ resource "aws_key_pair" "deployer" {
 #     create_before_destroy = true
 #   }
 # }
-
 resource "aws_launch_template" "example" {
-  name = "example-launch-template"
-
-  # Configuración de la instancia
-  instance_type = "t3.micro"
+  name = "${var.project_name}-launch-template"
   key_name = aws_key_pair.deployer.key_name
+  instance_type = "t3.micro"
   # Imagen de Ubuntu 24.04
   image_id = data.aws_ami.ubuntu.id
-
-  # Datos de usuario para inicializar la instancia
-  user_data = base64encode(templatefile(
-    # path
-    "${path.module}/userdata.sh",
-    # variables para la plantilla
-    # { port = 8080, ip_addrs = ["10.0.0.1", "10.0.0.2"] }
-    {}
-  ))
-
-  # Configuración de red
-  network_interfaces {
-    associate_public_ip_address = true
-    security_groups             = [
-      aws_security_group.instance.id,
-      aws_security_group.instance_ssh.id
-    ]
-  }
-
   # Detalles del bloque de almacenamiento
   block_device_mappings {
     device_name = "/dev/sda1"
@@ -216,15 +194,63 @@ resource "aws_launch_template" "example" {
       volume_type = "gp3"
     }
   }
-
-  # Etiquetas opcionales para la instancia
-  tag_specifications {
-    resource_type = "instance"
-    tags = {
-      Name = "ExampleInstance"
-    }
-  }
+  vpc_security_group_ids = [
+    aws_security_group.instance.id,
+    aws_security_group.instance_ssh.id
+  ]
+  # Datos de usuario para inicializar la instancia
+  user_data = base64encode(templatefile(
+    # path
+    "${path.module}/userdata.sh",
+    # variables para la plantilla
+    # { port = 8080, ip_addrs = ["10.0.0.1", "10.0.0.2"] }
+    {}
+  ))
 }
+# resource "aws_launch_template" "example" {
+#   name = "example-launch-template"
+#   name_prefix     = "test"
+#   # Configuración de la instancia
+#   instance_type = "t3.micro"
+#   key_name = aws_key_pair.deployer.key_name
+#   # Imagen de Ubuntu 24.04
+#   image_id = data.aws_ami.ubuntu.id
+#
+#   # Datos de usuario para inicializar la instancia
+#   user_data = base64encode(templatefile(
+#     # path
+#     "${path.module}/userdata.sh",
+#     # variables para la plantilla
+#     # { port = 8080, ip_addrs = ["10.0.0.1", "10.0.0.2"] }
+#     {}
+#   ))
+#
+#   # Configuración de red
+#   network_interfaces {
+#     associate_public_ip_address = true
+#     security_groups             = [
+#       aws_security_group.instance.id,
+#       aws_security_group.instance_ssh.id
+#     ]
+#   }
+#
+#   # Detalles del bloque de almacenamiento
+#   block_device_mappings {
+#     device_name = "/dev/sda1"
+#     ebs {
+#       volume_size = 8
+#       volume_type = "gp3"
+#     }
+#   }
+#
+#   # Etiquetas opcionales para la instancia
+#   tag_specifications {
+#     resource_type = "instance"
+#     tags = {
+#       Name = "ExampleInstance"
+#     }
+#   }
+# }
 
 
 resource "aws_autoscaling_group" "example" {
@@ -234,8 +260,11 @@ resource "aws_autoscaling_group" "example" {
     version = "$Latest"
   }
   vpc_zone_identifier  = data.aws_subnets.default.ids
+  #availability_zones    = [var.availability_zone]
   target_group_arns = [aws_lb_target_group.asg.arn]
   health_check_type = "ELB"
+  termination_policies  = ["OldestInstance"]
+  desired_capacity      = 2
   min_size = 2
   max_size = 10
 
@@ -243,6 +272,10 @@ resource "aws_autoscaling_group" "example" {
     key                 = "Name"
     value               = "${var.project_name}-asg-example"
     propagate_at_launch = true
+  }
+  # ignora el tamaño actual al redesplegar
+  lifecycle {
+    ignore_changes = [desired_capacity]
   }
 }
 

@@ -7,3 +7,7 @@ variable "availability_zone_b" {
 variable "db_password" {
   default = "admin1234"
 }
+
+variable "subnet_group_name" {
+  type = string
+}
