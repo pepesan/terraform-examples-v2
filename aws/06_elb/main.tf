@@ -2,7 +2,6 @@ provider "aws" {
   region = "eu-west-3"
 }
 variable "ssh_key_path" {}
-variable "vpc_id" {}
 variable "availability_zone" {}
 variable "server_port" {
   description = "The port the server will use for HTTP requests"
@@ -15,6 +14,7 @@ variable "project_name" {
 
 resource "aws_security_group" "instance" {
   name = "${var.project_name}-example-instance"
+  vpc_id      = data.aws_vpc.default.id
   ingress {
     from_port   = var.server_port
     to_port     = var.server_port
@@ -31,6 +31,7 @@ resource "aws_security_group" "instance" {
 
 resource "aws_security_group" "instance_ssh" {
   name = "${var.project_name}-example-instance-ssh"
+  vpc_id      = data.aws_vpc.default.id
   ingress {
     from_port   = 22
     to_port     = 22
@@ -159,29 +160,79 @@ resource "aws_key_pair" "deployer" {
   public_key = file(var.ssh_key_path)
 }
 
-resource "aws_launch_configuration" "example" {
-  image_id        = data.aws_ami.ubuntu.id
-  instance_type   = "t2.micro"
-  security_groups = [
-    aws_security_group.instance.id,
-    aws_security_group.instance_ssh.id
-  ]
+# resource "aws_launch_configuration" "example" {
+#   image_id        = data.aws_ami.ubuntu.id
+#   instance_type   = "t3.micro"
+#   security_groups = [
+#     aws_security_group.instance.id,
+#     aws_security_group.instance_ssh.id
+#   ]
+#   key_name = aws_key_pair.deployer.key_name
+#   user_data = templatefile(
+#     # path
+#     "${path.module}/userdata.sh",
+#     # variables para la plantilla
+#     # { port = 8080, ip_addrs = ["10.0.0.1", "10.0.0.2"] }
+#     {}
+#   )
+#   # Required when using a launch configuration with an ASG.
+#   lifecycle {
+#     create_before_destroy = true
+#   }
+# }
+
+resource "aws_launch_template" "example" {
+  name = "example-launch-template"
+
+  # Configuración de la instancia
+  instance_type = "t3.micro"
   key_name = aws_key_pair.deployer.key_name
-  user_data = <<-EOF
-              #!/bin/bash
-              sudo apt update
-              sudo apt install -y nginx
-              sudo systemctl enable nginx
-              sudo systemctl start nginx
-              EOF
-  # Required when using a launch configuration with an ASG.
-  lifecycle {
-    create_before_destroy = true
+  # Imagen de Ubuntu 24.04
+  image_id = data.aws_ami.ubuntu.id
+
+  # Datos de usuario para inicializar la instancia
+  user_data = base64encode(templatefile(
+    # path
+    "${path.module}/userdata.sh",
+    # variables para la plantilla
+    # { port = 8080, ip_addrs = ["10.0.0.1", "10.0.0.2"] }
+    {}
+  ))
+
+  # Configuración de red
+  network_interfaces {
+    associate_public_ip_address = true
+    security_groups             = [
+      aws_security_group.instance.id,
+      aws_security_group.instance_ssh.id
+    ]
+  }
+
+  # Detalles del bloque de almacenamiento
+  block_device_mappings {
+    device_name = "/dev/sda1"
+    ebs {
+      volume_size = 8
+      volume_type = "gp3"
+    }
+  }
+
+  # Etiquetas opcionales para la instancia
+  tag_specifications {
+    resource_type = "instance"
+    tags = {
+      Name = "ExampleInstance"
+    }
   }
 }
 
+
 resource "aws_autoscaling_group" "example" {
-  launch_configuration = aws_launch_configuration.example.name
+  #launch_configuration = aws_launch_configuration.example.name
+  launch_template {
+    id      = aws_launch_template.example.id
+    version = "$Latest"
+  }
   vpc_zone_identifier  = data.aws_subnets.default.ids
   target_group_arns = [aws_lb_target_group.asg.arn]
   health_check_type = "ELB"
