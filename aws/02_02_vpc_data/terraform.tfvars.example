@@ -1,0 +1,6 @@
+ssh_key_path="/home/usuario/.ssh/id_rsa.pub"
+project_name="terraform"
+region_name="eu-west-3"
+availability_zone="eu-west-3a"
+vpc_id="vpc-c2df3aaa"
+instance_type="t3.micro"
