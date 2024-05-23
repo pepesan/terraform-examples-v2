@@ -1,2 +1,2 @@
 project_name="terraform"
-region_name="eu-west-3"
+region="eu-west-3"

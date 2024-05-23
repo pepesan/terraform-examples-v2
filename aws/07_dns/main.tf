@@ -2,7 +2,7 @@ provider "aws" {
   region = "eu-west-3"
 }
 data "aws_route53_zone" "selected" {
-  name         = "biblioteca.tech."
+  name         = "buildconfes.click."
   private_zone = false
 }
 
