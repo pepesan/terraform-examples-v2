@@ -20,3 +20,8 @@ variable "instance_type" {
   type = string
   default = "t3.micro"
 }
+
+variable "count_value" {
+  type = number
+  default = 2
+}

@@ -6,16 +6,7 @@ resource "aws_key_pair" "deployer-key" {
 }
 
 
-resource "aws_ebs_volume" "web" {
-  count = 2
-  availability_zone = var.availability_zone
-  size              = 4
-  type = "gp3"
-  encrypted =   true
-  tags = {
-    Name = "${var.project_name}-web-ebs"
-  }
-}
+
 resource "aws_security_group" "allow_ssh" {
   name        = "allow_ssh_${var.project_name}"
   description = "Allow SSH inbound traffic"
@@ -67,13 +58,8 @@ resource "aws_security_group" "allow_http" {
   }
 
 
-// 16kB tamaño maximo
-# data "template_file" "userdata" {
-#   template = file("${path.module}/userdata.sh")
-# }
-
 resource "aws_instance" "web" {
-  count = 2
+  count = var.count_value
   ami           = data.aws_ami.ubuntu.id
   availability_zone = var.availability_zone
   instance_type = var.instance_type
@@ -93,10 +79,19 @@ resource "aws_instance" "web" {
     Name = "${var.project_name}-web-instance-${count.index}"
   }
 }
-
+resource "aws_ebs_volume" "web" {
+  count = var.count_value
+  availability_zone = var.availability_zone
+  size              = 4
+  type = "gp3"
+  encrypted =   true
+  tags = {
+    Name = "${var.project_name}-web-ebs"
+  }
+}
 
 resource "aws_volume_attachment" "web" {
-  count = 2
+  count = var.count_value
   device_name = "/dev/sdh"
   volume_id   = element(aws_ebs_volume.web.*.id, count.index)
   instance_id = element(aws_instance.web.*.id, count.index)
