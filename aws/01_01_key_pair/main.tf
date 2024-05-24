@@ -3,7 +3,7 @@ provider "aws" {
 }
 
 variable "project_name" {
-  type = string
+  type    = string
   default = "profe"
 }
 
