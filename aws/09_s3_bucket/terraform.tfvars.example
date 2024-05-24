@@ -1,3 +1,4 @@
 region="eu-west-3"
-bucket_name="terraform-backend-cdd"
+project_name="terraform"
+client_name="cdd"
 acl_value="private"

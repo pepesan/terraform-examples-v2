@@ -1,17 +1,28 @@
-variable "region" {}
-
 provider "aws" {
   region      = var.region
 }
 
+variable "region" {}
+
 variable "bucket_name" {
+  type = string
   default = "My bucket"
 }
 variable "acl_value" {
+  type = string
   default = "private"
 }
+
+variable "project_name" {
+  type = string
+  default = "terraform"
+}
+variable "client_name" {
+  type = string
+  default = "cdd"
+}
 resource "aws_s3_bucket" "b" {
-  bucket = var.bucket_name
+  bucket = "${var.client_name}-${var.project_name}-backend-tfstate"
   /*
   lifecycle {
     prevent_destroy = true

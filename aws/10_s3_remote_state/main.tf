@@ -1,8 +1,24 @@
+variable "project_name" {
+  type = string
+  default = "cdd"
+}
+variable "region" {
+  type = string
+  default = "region"
+}
+
+variable "ssh_key_path" {
+  type = string
+}
+variable "vpc_id" {
+  type = string
+}
+
 terraform {
   backend "s3" {
     # Replace this with your bucket name!
-    bucket         = "terraform-backend-cdd"
-    key            = "workspaces-example/terraform.tfstate"
+    bucket         = "cdd-profe-backend-tfstate"
+    key            = "cdd/terraform.tfstate"
     region         = "eu-west-3"
 
     # Replace this with your DynamoDB table name!
@@ -11,7 +27,6 @@ terraform {
   }
 }
 
-variable "region" {}
 
 provider "aws" {
   region      = var.region
@@ -22,7 +37,7 @@ data "aws_ami" "ubuntu" {
 
   filter {
     name   = "name"
-    values = ["ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-*"]
+    values = ["ubuntu/images/hvm-ssd-gp3/ubuntu-noble-24.04-amd64-server-*"]
   }
 
   filter {
@@ -33,20 +48,15 @@ data "aws_ami" "ubuntu" {
   owners = ["099720109477"] # Canonical
 }
 
-variable "ssh_key_path" {
-  type = string
-}
-variable "vpc_id" {
-  type = string
-}
+
 
 resource "aws_key_pair" "deployer" {
-  key_name   = "deployer-key"
+  key_name   = "${var.project_name}-deployer-key"
   public_key = file(var.ssh_key_path)
 }
 
 resource "aws_security_group" "allow_ssh" {
-  name        = "allow_ssh"
+  name        = "${var.project_name}-allow_ssh"
   description = "Allow SSH inbound traffic"
   vpc_id      = var.vpc_id
 
@@ -78,7 +88,7 @@ resource "aws_instance" "web" {
     aws_security_group.allow_ssh.id
   ]
   tags = {
-    Name = "HelloWorld"
+    Name = "HelloWorld-${var.project_name}"
   }
 }
 

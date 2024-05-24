@@ -3,3 +3,6 @@ region="eu-west-3"
 ssh_key_path="/ruta/id_rsa.pub"
 # Aquí va el ID de la VPC
 vpc_id="vpc-XXXX"
+# nombre de proyecto
+project_name="cdd"
+
