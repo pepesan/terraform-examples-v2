@@ -86,7 +86,7 @@ resource "aws_ebs_volume" "web" {
   type = "gp3"
   encrypted =   true
   tags = {
-    Name = "${var.project_name}-web-ebs"
+    Name = "${var.project_name}-web-ebs-${count.index}"
   }
 }
 
