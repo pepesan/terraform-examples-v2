@@ -50,6 +50,8 @@ sudo apt-get install -y helm
 # Instalación de repositorios de ejemplos
 sudo apt update
 sudo apt install -y git
+cd /home/ubuntu
 git clone https://github.com/pepesan/ejemplos-kubernetes.git
+sudo chown -R ubuntu:ubuntu /home/ubuntu/ejemplos-kubernetes
 # ejecución de minikube
 # minikube start --driver=docker --cpus 3 --memory 12g --kubernetes-version 1.30 --auto-update-drivers=true --disk-size='40000mb'

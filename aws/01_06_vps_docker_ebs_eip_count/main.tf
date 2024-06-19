@@ -56,7 +56,30 @@ resource "aws_security_group" "allow_http" {
       Name = "allow_http"
     }
   }
+resource "aws_security_group" "allow_https" {
+  name        = "allow_https-${var.project_name}"
+  description = "Allow https inbound traffic"
+  vpc_id      = var.vpc_id
 
+  ingress {
+    description = "https from VPC"
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "allow_http"
+  }
+}
 resource "aws_security_group" "allow_lb" {
   name        = "allow_lb-${var.project_name}"
   description = "Allow lb inbound traffic"
@@ -65,7 +88,7 @@ resource "aws_security_group" "allow_lb" {
   ingress {
     description = "lb from VPC"
     from_port   = 30000
-    to_port     = 33000
+    to_port     = 50000
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
@@ -93,6 +116,7 @@ resource "aws_instance" "web" {
   vpc_security_group_ids = [
     aws_security_group.allow_ssh.id,
     aws_security_group.allow_http.id,
+    aws_security_group.allow_https.id,
     aws_security_group.allow_lb.id
   ]
   user_data = templatefile(
