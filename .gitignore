@@ -5,3 +5,4 @@
 .terraform.*
 terraform.tfstate*
 terraform.tfvars
+id_ed25519*
