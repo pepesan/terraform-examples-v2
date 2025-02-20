@@ -4,3 +4,4 @@ region_name="eu-west-3"
 availability_zone="eu-west-3a"
 vpc_id="vpc-xxxxxx"
 instance_type="t3.micro"
+count_value=2

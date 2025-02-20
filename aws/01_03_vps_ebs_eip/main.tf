@@ -63,7 +63,31 @@ resource "aws_security_group" "allow_http" {
     tags = {
       Name = "allow_http"
     }
+}
+resource "aws_security_group" "allow_https" {
+  name        = "allow_https-${var.project_name}"
+  description = "Allow https inbound traffic"
+  vpc_id      = var.vpc_id
+
+  ingress {
+    description = "https from VPC"
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
   }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "allow_https"
+  }
+}
 
 
 // 16kB tamaño maximo
@@ -77,7 +101,8 @@ resource "aws_instance" "web" {
   instance_type = var.instance_type
   vpc_security_group_ids = [
     aws_security_group.allow_ssh.id,
-    aws_security_group.allow_http.id
+    aws_security_group.allow_http.id,
+    aws_security_group.allow_https.id
   ]
   user_data = templatefile(
     # path
