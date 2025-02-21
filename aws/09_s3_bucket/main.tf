@@ -1,26 +1,4 @@
-provider "aws" {
-  region      = var.region
-}
 
-variable "region" {}
-
-variable "bucket_name" {
-  type = string
-  default = "My bucket"
-}
-variable "acl_value" {
-  type = string
-  default = "private"
-}
-
-variable "project_name" {
-  type = string
-  default = "terraform"
-}
-variable "client_name" {
-  type = string
-  default = "cdd"
-}
 resource "aws_s3_bucket" "b" {
   bucket = "${var.client_name}-${var.project_name}-backend-tfstate"
   /*
@@ -31,7 +9,7 @@ resource "aws_s3_bucket" "b" {
 
   tags = {
     Name        = "My bucket"
-    Environment = "Dev"
+    Environment = "${var.client_name}-${var.project_name}-Dev"
   }
 }
 /*
@@ -94,14 +72,4 @@ resource "aws_s3_bucket_public_access_block" "public_access" {
 #}
 
 
-output "s3_bucket_arn" {
-  value       = aws_s3_bucket.b.arn
-  description = "The ARN of the S3 bucket"
-}
-
-# ya no es necesaria una tabla de dynamodb para disponer de un backend remoto en s3
-#output "dynamodb_table_name" {
-#  value       = aws_dynamodb_table.terraform_locks.name
-#  description = "The name of the DynamoDB table"
-#}
 

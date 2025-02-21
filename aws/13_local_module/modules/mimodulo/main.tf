@@ -1,5 +1,5 @@
 variable "mivar" {
-default = "valor"
+    default = "valor"
 }
 
 output "salida" {

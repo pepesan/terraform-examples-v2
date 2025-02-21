@@ -5,7 +5,7 @@ provider "aws" {
 
 module "llamada" {
   source="./modules/mimodulo"
-  mivar = "Entrada"
+  mivar = "Entrada modificada"
   
 }
 
