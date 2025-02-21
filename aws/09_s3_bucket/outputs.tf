@@ -9,7 +9,7 @@ output "s3_bucket_name" {
 }
 
 # ya no es necesaria una tabla de dynamodb para disponer de un backend remoto en s3
-#output "dynamodb_table_name" {
-#  value       = aws_dynamodb_table.terraform_locks.name
-#  description = "The name of the DynamoDB table"
-#}
+output "dynamodb_table_name" {
+  value       = aws_dynamodb_table.terraform_locks.name
+  description = "The name of the DynamoDB table"
+}
