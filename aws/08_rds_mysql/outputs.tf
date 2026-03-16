@@ -12,3 +12,8 @@ output "rds_username" {
   description = "RDS instance root username"
   value       = aws_db_instance.rds.username
 }
+
+output "rds_endpoint" {
+  description = "RDS endpoint to connect from outside"
+  value       = aws_db_instance.rds.endpoint
+}

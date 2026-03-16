@@ -13,18 +13,20 @@ variable "project_name" {
 }
 
 resource "aws_security_group" "instance" {
-  name = "${var.project_name}-example-instance"
-  vpc_id      = data.aws_vpc.default.id
+  name   = "${var.project_name}-example-instance"
+  vpc_id = data.aws_vpc.default.id
+
   ingress {
     from_port   = var.server_port
     to_port     = var.server_port
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
+
   egress {
     from_port   = 0
     to_port     = 0
-    protocol    = "tcp"
+    protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
 }

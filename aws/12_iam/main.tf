@@ -33,8 +33,9 @@ resource "aws_iam_user" "demo2" {
 
 resource "aws_iam_user_policy" "newemp_policy" {
   count = length(var.username2)
-  name = "new"
-  user = element(var.username2,count.index)
+  name  = "new"
+  user  = aws_iam_user.demo2[count.index].name
+
   policy = <<EOF
 {
   "Version": "2012-10-17",
@@ -88,7 +89,8 @@ resource "aws_iam_user_login_profile" "administrator" {
 
 output "password" {
   value     = aws_iam_user_login_profile.administrator.password
-  #sensitive = true
+  # En producción no se recomienda mostrar la contraseña en texto plano, esto es solo para fines de demostración
+  sensitive = true
 }
 
 

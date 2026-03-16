@@ -1,5 +1,42 @@
+variable "region" {
+  description = "Región donde se desplegarán los recursos"
+  type        = string
+  default     = "eu-west-3"
+}
+
+variable "instance_type" {
+  description = "Tipo de instancia"
+  type        = string
+  default     = "t3.micro"
+}
+
+variable "tags" {
+  description = "Tags para los recursos"
+  type        = map(string)
+  default = {
+    Environment = "dev"
+    Project     = "terraform-demo"
+    ManagedBy   = "terraform"
+  }
+}
+
+variable "ssh_key_path" {
+  type = string
+}
+variable "ssh_key_private_path" {
+  type = string
+}
+variable "vpc_id" {
+  type = string
+}
+
+variable "project_name" {
+  type    = string
+  default = "profe"
+}
+
 provider "aws" {
-  region = "eu-west-3"
+  region = var.region
 }
 
 data "aws_ami" "ubuntu" {
@@ -28,20 +65,7 @@ data "aws_ami" "ubuntu" {
   owners = ["099720109477"] # Canonical
 }
 
-variable "ssh_key_path" {
-  type = string
-}
-variable "ssh_key_private_path" {
-  type = string
-}
-variable "vpc_id" {
-  type = string
-}
 
-variable "project_name" {
-  type    = string
-  default = "profe"
-}
 
 resource "aws_key_pair" "deployer" {
   key_name   = "deployer-key-ubuntu-${var.project_name}"
@@ -107,4 +131,14 @@ output "ip_instance" {
 
 output "ssh" {
   value = "ssh -l ubuntu ${aws_instance.web.public_ip}"
+}
+
+output "instance_type_used" {
+  description = "Tipo de instancia utilizado"
+  value       = var.instance_type
+}
+
+output "deployment_region" {
+  description = "Región donde se desplegó la infraestructura"
+  value       = var.region
 }

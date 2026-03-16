@@ -5,7 +5,7 @@ provider "aws" {
 data "aws_region" "current" { }
 
 output "salida-region" {
-  value = data.aws_region.current.name
+  value = data.aws_region.current.region
 }
 
 data "aws_availability_zones" "available" {

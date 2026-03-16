@@ -6,27 +6,40 @@ provider "aws" {
 }
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
-  #version = "19.15.3"
-  cluster_name    = local.cluster_name
+  #version = "21.15.1"
+  name    = local.cluster_name
   # ojo con la versión, cobran más por versiones antiguas
-  cluster_version = "1.30"
+  kubernetes_version = "1.35"
 
   vpc_id     = module.vpc.vpc_id
   subnet_ids = module.vpc.private_subnets
 
-  eks_managed_node_group_defaults = {
-    ami_type = "AL2_x86_64"
-
-    attach_cluster_primary_security_group = true
-
-    # Disabling and using externally provided security groups
-    create_security_group = false
+  addons = {
+    coredns                = {}
+    eks-pod-identity-agent = {
+      before_compute = true
+    }
+    kube-proxy             = {}
+    vpc-cni                = {
+      before_compute = true
+    }
   }
+
+  # Optional
+  endpoint_public_access = true
+
+  # Optional: Adds the current caller identity as an administrator via cluster access entry
+  enable_cluster_creator_admin_permissions = true
+
+
 
   eks_managed_node_groups = {
     one = {
       name = "node-group-1"
-
+      # Starting on 1.30, AL2023 is the default AMI type for EKS managed node groups
+      ami_type       = "AL2023_x86_64_STANDARD"
+      attach_cluster_primary_security_group = true
+      create_security_group                 = false
       instance_types = ["t3.small"]
 
       min_size     = 1
@@ -45,7 +58,10 @@ module "eks" {
 
     two = {
       name = "node-group-2"
-
+      # Starting on 1.30, AL2023 is the default AMI type for EKS managed node groups
+      ami_type       = "AL2023_x86_64_STANDARD"
+      attach_cluster_primary_security_group = true
+      create_security_group                 = false
       instance_types = ["t3.medium"]
 
       min_size     = 1

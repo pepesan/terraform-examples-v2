@@ -3,7 +3,7 @@ resource "aws_db_instance" "rds" {
   identifier = "${var.project_name}-rds"
   storage_type = "gp3"
   engine = "mysql"
-  engine_version = "8.0.36"
+  engine_version = "8.4.7"
   instance_class = "db.t3.micro"
   db_name = "mydb"
   username = "admin"
