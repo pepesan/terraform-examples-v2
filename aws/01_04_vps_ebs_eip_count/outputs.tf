@@ -14,6 +14,13 @@ output "ssh_commands" {
   ]
 }
 
+output "urls" {
+  description = "Comandos SSH para las instancias web"
+  value = [
+    for ip in aws_instance.web[*].public_ip : "http://${ip}/"
+  ]
+}
+
 
 # output "ssh" {
 #   value = "ssh -l ubuntu ${aws_instance.web.*.public_ip}"
