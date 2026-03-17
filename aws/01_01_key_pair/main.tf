@@ -19,3 +19,7 @@ resource "aws_key_pair" "deployer" {
 output "ssh_key_name" {
   value = "Clave creada ${aws_key_pair.deployer.key_name}"
 }
+
+output "ssh_arn" {
+  value = "ARN creado ${aws_key_pair.deployer.arn}"
+}
