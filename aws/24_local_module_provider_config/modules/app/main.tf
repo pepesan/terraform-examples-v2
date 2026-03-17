@@ -1,0 +1,95 @@
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = ">= 5.0"
+    }
+  }
+}
+
+variable "bucket_name" {
+  type = string
+}
+
+
+resource "aws_s3_bucket" "this" {
+  bucket = "${var.bucket_name}-terraform"
+  # No colocar el producción
+  force_destroy = true
+  /*
+  lifecycle {
+    prevent_destroy = true
+  }
+  */
+
+  tags = {
+    Name        = "My bucket"
+    Environment = "${var.bucket_name}-terraform-Dev"
+  }
+}
+/*
+resource "aws_s3_bucket_acl" "example" {
+  bucket = aws_s3_bucket.b.id
+  acl    = var.acl_value
+}
+*/
+resource "aws_s3_bucket_versioning" "versioning_example" {
+  bucket = aws_s3_bucket.this.id
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
+
+resource "aws_s3_bucket_server_side_encryption_configuration" "default" {
+  bucket = aws_s3_bucket.this.id
+
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm = "AES256"
+    }
+  }
+}
+/*
+resource "aws_kms_key" "mykey" {
+  description             = "This key is used to encrypt bucket objects"
+}
+
+resource "aws_s3_bucket_server_side_encryption_configuration" "example" {
+  bucket = aws_s3_bucket.b.bucket
+
+  rule {
+    apply_server_side_encryption_by_default {
+      kms_master_key_id = aws_kms_key.mykey.arn
+      sse_algorithm     = "aws:kms"
+    }
+  }
+}
+*/
+
+resource "aws_s3_bucket_public_access_block" "public_access" {
+  bucket                  = aws_s3_bucket.this.id
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
+
+# ya no es obligatorio pero sí recomendable una tabla de dynamodb para disponer de un backend remoto en s3
+#resource "aws_dynamodb_table" "terraform_locks" {
+#  name         = "${var.project_name}-${var.client_name}-up-and-running-locks"
+#  billing_mode = "PAY_PER_REQUEST"
+#  hash_key     = "LockID"
+
+#  attribute {
+#    name = "LockID"
+#    type = "S"
+#  }
+#}
+
+output "bucket_arn" {
+  value = aws_s3_bucket.this.arn
+}
+
+output "bucket_name" {
+  value = aws_s3_bucket.this.bucket_domain_name
+}
