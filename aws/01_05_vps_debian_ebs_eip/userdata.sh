@@ -12,12 +12,12 @@ sudo parted --script /dev/sdh mklabel gpt
 # Create a new primary partition with all available space
 sudo parted --script /dev/sdh mkpart primary 0% 100%
 
-# Optionally, format the new partition (assuming the new partition is /dev/sdh1)
-sudo mkfs -t ext4 /dev/sdh1
+# Optionally, format the new partition (assuming the new partition is /dev/sdh1 pero está dispomnible como /dev/nvme1n1p1)
+sudo mkfs.ext4 /dev/nvme1n1p1
 echo "Partitioning and formatting completed."
 sudo mkdir /mnt/demo_web_volume
-sudo mount /dev/sdh1 /mnt/demo_web_volume
-echo "/dev/sdh1  /mnt/demo_web_volume    ext4   defaults 0 2" >> /etc/fstab
+sudo mount /dev/nvme1n1p1 /mnt/demo_web_volume
+echo "/dev/nvme1n1p1  /mnt/demo_web_volume    ext4   defaults 0 2" >> /etc/fstab
 sudo rm -rf /var/www/html
 sudo mkdir /mnt/demo_web_volume/html
 sudo ln -s /mnt/demo_web_volume/html /var/www/html
