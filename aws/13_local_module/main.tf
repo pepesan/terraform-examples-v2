@@ -3,9 +3,13 @@ provider "aws" {
   region = "eu-west-3"
 }
 
+variable "mivar" {
+
+}
+
 module "llamada" {
   source="./modules/mimodulo"
-  mivar = "Entrada modificada"
+  mivar = var.mivar
   
 }
 

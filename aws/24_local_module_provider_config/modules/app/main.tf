@@ -1,17 +1,3 @@
-terraform {
-  required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = ">= 5.0"
-    }
-  }
-}
-
-variable "bucket_name" {
-  type = string
-}
-
-
 resource "aws_s3_bucket" "this" {
   bucket = "${var.bucket_name}-terraform"
   # No colocar el producción
@@ -86,10 +72,3 @@ resource "aws_s3_bucket_public_access_block" "public_access" {
 #  }
 #}
 
-output "bucket_arn" {
-  value = aws_s3_bucket.this.arn
-}
-
-output "bucket_name" {
-  value = aws_s3_bucket.this.bucket_domain_name
-}

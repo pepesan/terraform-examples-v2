@@ -8,10 +8,6 @@ output "cluster_security_group_id" {
   value       = module.eks.cluster_security_group_id
 }
 
-output "k8s_cluster_endpoint" {
-  value = module.eks.cluster_endpoint
-}
-
 output "k8s_cluster_certificate_authority_data" {
   value = base64decode(module.eks.cluster_certificate_authority_data)
 }

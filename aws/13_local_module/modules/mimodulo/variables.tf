@@ -1,0 +1,3 @@
+variable "mivar" {
+  default = "valor"
+}
