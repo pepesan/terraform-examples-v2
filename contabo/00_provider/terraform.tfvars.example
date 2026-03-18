@@ -1,0 +1,7 @@
+# https://new.contabo.com/account/security
+contabo_client_id     = "XXX"
+contabo_client_secret = "XXX"
+contabo_user          = "XXX"
+# Hay que solicitar una contraseña de API, que es diferente a la contraseña de acceso a la cuenta
+contabo_pass          = "XXX"
+ssh_key_path="~/.ssh/id_ed25519.pub"

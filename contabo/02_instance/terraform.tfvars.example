@@ -1,0 +1,9 @@
+# https://new.contabo.com/account/security
+contabo_client_id     = "XXX"
+contabo_client_secret = "XXX"
+contabo_user          = "XXX"
+# Hay que solicitar una contraseña de API, que es diferente a la contraseña de acceso a la cuenta
+contabo_pass          = "XXX"
+root_password="root"
+ssh_key_id="XXXX"
+instance_name="servidor-00"
