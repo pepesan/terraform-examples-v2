@@ -1,0 +1,3 @@
+# Aquí va la clave SSH pública
+ssh_public_key = "xxx"
+project_name = "terraform"
