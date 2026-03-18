@@ -8,4 +8,5 @@ module "vps" {
   ssh_key_private_path = var.ssh_key_private_path
   vpc_id               = var.vpc_id
   project_name         = var.project_name
+  instance_type        = var.instance_type
 }
