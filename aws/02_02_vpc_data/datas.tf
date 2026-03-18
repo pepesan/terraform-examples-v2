@@ -1,6 +1,6 @@
 variable "vpc_id" {}
 # Vpc disponibles
-data "aws_vpcs" "vpcs"{}
+data "aws_vpcs" "vpcs" {}
 
 # Datos de una VPC
 data "aws_vpc" "selected" {

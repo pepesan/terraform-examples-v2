@@ -1,8 +1,8 @@
 module "vpc" {
-  source = "terraform-aws-modules/vpc/aws"
+  source  = "terraform-aws-modules/vpc/aws"
   version = "~> 6.6.0"
-  name = "my-vpc-${var.project_name}"
-  cidr = "10.0.0.0/16"
+  name    = "my-vpc-${var.project_name}"
+  cidr    = "10.0.0.0/16"
 
   azs             = ["eu-west-3a", "eu-west-3b", "eu-west-3c"]
   private_subnets = ["10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24"]
@@ -12,7 +12,7 @@ module "vpc" {
   enable_vpn_gateway = true
 
   tags = {
-    Terraform = "true"
+    Terraform   = "true"
     Environment = "dev"
   }
 }
