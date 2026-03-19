@@ -1,0 +1,4 @@
+app_name        = "demo-app"
+instance_count  = 4
+private_subnets = ["subnet-a", "subnet-b"]
+enable_dns      = true

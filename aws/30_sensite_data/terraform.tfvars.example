@@ -1,0 +1,2 @@
+db_password  = "SuperSecretPassword123!"
+session_token = "temporary-token-abc-123"
