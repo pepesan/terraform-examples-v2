@@ -13,3 +13,15 @@ output "ssh" {
 output "url" {
   value = "http://${aws_eip.eip.public_ip}/"
 }
+
+output "dns_record" {
+  value = aws_route53_record.www.name
+}
+
+output "fqdn_dns_record" {
+  value = aws_route53_record.www.fqdn
+}
+
+output "url_dns" {
+  value = "http://${aws_route53_record.www.fqdn}/"
+}
