@@ -14,6 +14,10 @@ terraform state show aws_s3_bucket.b
 terraform state mv aws_s3_bucket.b aws_s3_bucket.storage
 # Eliminar un recurso del estado
 terraform state rm aws_s3_bucket.storage
+# Importar un recurso a Terraform
+terraform import aws_s3_bucket.storage nombre-del-bucket
+# Refrescar el estado con la infraestructura real, pero el estado debe existir
+terraform plan -refresh-only
 
 # Ver el estado completo
 terraform show
