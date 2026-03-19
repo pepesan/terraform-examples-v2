@@ -1,4 +1,57 @@
-ssh_key_path = "/home/usuario/.ssh/id_ed25519.pub"
-ssh_key_private_path="/home/usuario/.ssh/id_ed25519"
+########################################
+# TIPOS PRIMITIVOS
+########################################
+
+region            = "eu-west-3"        # string
+instance_type     = "t3.micro"         # string
+instance_count    = 1                  # number
+enable_monitoring = true               # bool
+
+########################################
+# TIPOS DE COLECCIÓN
+########################################
+
+allowed_ssh_cidrs = [                  # list(string)
+  "0.0.0.0/0"
+]
+
+extra_security_group_ids = [           # set(string)
+  "sg-0123456789abcdef0"
+]
+
+tags = {                               # map(string)
+  Environment = "dev"
+  Project     = "terraform-demo"
+  ManagedBy   = "terraform"
+}
+
+########################################
+# TIPOS ESTRUCTURALES
+########################################
+
+ssh_config = {                         # object({...})
+  public_key_path  = "/home/pepesan/.ssh/id_ed25519.pub"
+  private_key_path = "/home/pepesan/.ssh/id_ed25519"
+}
+
+deployment_info = [                    # tuple([string, number, bool])
+  "dev",
+  22,
+  true
+]
+
+########################################
+# TIPO FLEXIBLE
+########################################
+
+extra_config = {                       # any
+  owner   = "pepesan"
+  purpose = "demo"
+}
+
+########################################
+# VARIABLES ORIGINALES
+########################################
+
+vpc_id       = "vpc-xxxxx"
 project_name = "terraform-profe"
-vpc_id="vpc-xxxxxx"

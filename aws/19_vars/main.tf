@@ -1,3 +1,11 @@
+terraform {
+  required_version = ">= 1.12.0"
+}
+
+############################
+# VARIABLES
+############################
+
 variable "region" {
   description = "Región donde se desplegarán los recursos"
   type        = string
@@ -5,9 +13,33 @@ variable "region" {
 }
 
 variable "instance_type" {
-  description = "Tipo de instancia"
+  description = "Tipo de instancia de referencia, aunque no se creará ninguna EC2"
   type        = string
   default     = "t3.micro"
+}
+
+variable "instance_count" {
+  description = "Número teórico de instancias"
+  type        = number
+  default     = 1
+}
+
+variable "enable_monitoring" {
+  description = "Activa o desactiva opciones de monitorización"
+  type        = bool
+  default     = true
+}
+
+variable "allowed_ssh_cidrs" {
+  description = "Lista de CIDRs permitidos para SSH"
+  type        = list(string)
+  default     = ["0.0.0.0/0"]
+}
+
+variable "extra_security_group_ids" {
+  description = "Conjunto de security groups adicionales"
+  type        = set(string)
+  default     = []
 }
 
 variable "tags" {
@@ -20,56 +52,68 @@ variable "tags" {
   }
 }
 
-variable "ssh_key_path" {
-  type = string
+variable "ssh_config" {
+  description = "Configuración de claves SSH"
+  type = object({
+    public_key_path  = string
+    private_key_path = string
+  })
 }
-variable "ssh_key_private_path" {
-  type = string
+
+variable "deployment_info" {
+  description = "Tupla con datos fijos del despliegue"
+  type        = tuple([string, number, bool])
+  default     = ["dev", 22, true]
 }
+
+variable "extra_config" {
+  description = "Configuración libre adicional"
+  type        = any
+  default     = null
+}
+
 variable "vpc_id" {
-  type = string
+  description = "ID de la VPC"
+  type        = string
 }
 
 variable "project_name" {
-  type    = string
-  default = "profe"
+  description = "Nombre del proyecto"
+  type        = string
+  default     = "profe"
 }
+
+############################
+# LOCALS
+############################
+
+locals {
+  environment_name = var.deployment_info[0]
+  ssh_port         = var.deployment_info[1]
+  ssh_enabled      = var.deployment_info[2]
+
+  merged_tags = merge(var.tags, {
+    Name        = "terraform-${var.project_name}"
+    Environment = local.environment_name
+  })
+}
+
+############################
+# PROVIDER
+############################
 
 provider "aws" {
   region = var.region
 }
 
-data "aws_ami" "ubuntu" {
-  most_recent = true
 
-  filter {
-    name = "name"
-    # values = ["ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-*"]
-    values = ["ubuntu/images/hvm-ssd-gp3/ubuntu-noble-24.04-amd64-server-*"]
-  }
-  filter {
-    name   = "root-device-type"
-    values = ["ebs"]
-  }
-
-  filter {
-    name   = "architecture"
-    values = ["x86_64"]
-  }
-
-  filter {
-    name   = "virtualization-type"
-    values = ["hvm"]
-  }
-
-  owners = ["099720109477"] # Canonical
-}
-
-
+############################
+# RECURSOS
+############################
 
 resource "aws_key_pair" "deployer" {
   key_name   = "deployer-key-ubuntu-${var.project_name}"
-  public_key = file(var.ssh_key_path)
+  public_key = file(var.ssh_config.public_key_path)
 }
 
 resource "aws_security_group" "allow_ssh" {
@@ -78,11 +122,11 @@ resource "aws_security_group" "allow_ssh" {
   vpc_id      = var.vpc_id
 
   ingress {
-    description = "SSH from VPC"
-    from_port   = 22
-    to_port     = 22
+    description = "SSH access"
+    from_port   = local.ssh_port
+    to_port     = local.ssh_port
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = var.allowed_ssh_cidrs
   }
 
   egress {
@@ -92,53 +136,64 @@ resource "aws_security_group" "allow_ssh" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  tags = {
-    Name = "allow_ssh"
-  }
+  tags = local.merged_tags
 }
 
-resource "aws_instance" "web" {
-  ami           = data.aws_ami.ubuntu.id
-  instance_type = "t3.micro"
-  key_name      = aws_key_pair.deployer.key_name
-  vpc_security_group_ids = [
-    aws_security_group.allow_ssh.id
-  ]
-  tags = {
-    Name = "HelloWorld-${var.project_name}"
-  }
-  # ejecución de comandos desde la maquina que lanza terraform
-  provisioner "local-exec" {
-    command = "echo The ssh id is ${self.id}, and public ip: ${self.public_ip} >> salida_terraform.txt"
-  }
-  connection {
-    type        = "ssh"
-    user        = "ubuntu"
-    host        = self.public_ip
-    private_key = file(var.ssh_key_private_path)
-  }
+############################
+# OUTPUTS
+############################
 
-  provisioner "remote-exec" {
-    inline = [
-      "echo hola >> fichero.txt"
-    ]
-  }
+output "deployment_region" {
+  description = "Región configurada"
+  value       = var.region
 }
 
-output "ip_instance" {
-  value = aws_instance.web.public_ip
-}
-
-output "ssh" {
-  value = "ssh -l ubuntu ${aws_instance.web.public_ip}"
-}
-
-output "instance_type_used" {
-  description = "Tipo de instancia utilizado"
+output "instance_type_declared" {
+  description = "Tipo de instancia declarado como variable"
   value       = var.instance_type
 }
 
-output "deployment_region" {
-  description = "Región donde se desplegó la infraestructura"
-  value       = var.region
+output "instance_count_declared" {
+  description = "Número teórico de instancias"
+  value       = var.instance_count
+}
+
+output "monitoring_enabled" {
+  description = "Valor booleano de monitorización"
+  value       = var.enable_monitoring
+}
+
+output "allowed_ssh_cidrs" {
+  description = "CIDRs permitidos para SSH"
+  value       = var.allowed_ssh_cidrs
+}
+
+output "extra_security_group_ids" {
+  description = "Security groups extra"
+  value       = var.extra_security_group_ids
+}
+
+output "tags_used" {
+  description = "Tags aplicadas"
+  value       = local.merged_tags
+}
+
+output "deployment_tuple_used" {
+  description = "Tupla usada en el despliegue"
+  value       = var.deployment_info
+}
+
+output "extra_config_value" {
+  description = "Valor recibido en extra_config"
+  value       = var.extra_config
+}
+
+output "security_group_id" {
+  description = "ID del security group creado"
+  value       = aws_security_group.allow_ssh.id
+}
+
+output "keypair_name" {
+  description = "Nombre del key pair creado"
+  value       = aws_key_pair.deployer.key_name
 }

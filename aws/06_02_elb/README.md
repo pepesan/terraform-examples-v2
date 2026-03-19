@@ -1,6 +1,6 @@
 ## Ejemplo de ALB 
 
-## Instalación de Grpahviz
+## Instalación de Graphviz
 ```shell
 sudo apt update
 sudo apt install -y graphviz
