@@ -28,20 +28,11 @@ variable "instance_name" {
   default = "servidor-00"
 }
 
-variable "instance_name_prefix" {
-  type    = string
-  default = "servidor"
-}
 
-variable "instance_count" {
-  type    = number
-  default = 7
-}
 
 resource "contabo_instance" "database_instance" {
-  count = var.instance_count
 
-  display_name  = format("%s-%02d", var.instance_name_prefix, count.index + 1)
+  display_name  = var.instance_name
 
   # https://api.contabo.com/#tag/Instances/operation/createInstance
   # V97: 8 vCPU, 24 GB RAM, 200 GB NVME
