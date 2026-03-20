@@ -1,0 +1,33 @@
+digraph G {
+  rankdir = "RL";
+  node [shape = rect, fontname = "sans-serif"];
+  "data.aws_ami.ubuntu" [label="data.aws_ami.ubuntu"];
+  "data.aws_subnets.default" [label="data.aws_subnets.default"];
+  "data.aws_vpc.default" [label="data.aws_vpc.default"];
+  "aws_autoscaling_group.example" [label="aws_autoscaling_group.example"];
+  "aws_key_pair.deployer" [label="aws_key_pair.deployer"];
+  "aws_launch_template.example" [label="aws_launch_template.example"];
+  "aws_lb.example" [label="aws_lb.example"];
+  "aws_lb_listener.http" [label="aws_lb_listener.http"];
+  "aws_lb_listener_rule.asg" [label="aws_lb_listener_rule.asg"];
+  "aws_lb_target_group.asg" [label="aws_lb_target_group.asg"];
+  "aws_security_group.alb" [label="aws_security_group.alb"];
+  "aws_security_group.instance" [label="aws_security_group.instance"];
+  "aws_security_group.instance_ssh" [label="aws_security_group.instance_ssh"];
+  "data.aws_subnets.default" -> "data.aws_vpc.default";
+  "aws_autoscaling_group.example" -> "data.aws_subnets.default";
+  "aws_autoscaling_group.example" -> "aws_launch_template.example";
+  "aws_autoscaling_group.example" -> "aws_lb_target_group.asg";
+  "aws_launch_template.example" -> "data.aws_ami.ubuntu";
+  "aws_launch_template.example" -> "aws_key_pair.deployer";
+  "aws_launch_template.example" -> "aws_security_group.instance";
+  "aws_launch_template.example" -> "aws_security_group.instance_ssh";
+  "aws_lb.example" -> "data.aws_subnets.default";
+  "aws_lb.example" -> "aws_security_group.alb";
+  "aws_lb_listener.http" -> "aws_lb.example";
+  "aws_lb_listener_rule.asg" -> "aws_lb_listener.http";
+  "aws_lb_listener_rule.asg" -> "aws_lb_target_group.asg";
+  "aws_lb_target_group.asg" -> "data.aws_vpc.default";
+  "aws_security_group.instance" -> "data.aws_vpc.default";
+  "aws_security_group.instance_ssh" -> "data.aws_vpc.default";
+}
