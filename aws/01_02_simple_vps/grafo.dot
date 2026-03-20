@@ -1,0 +1,11 @@
+digraph G {
+  rankdir = "RL";
+  node [shape = rect, fontname = "sans-serif"];
+  "data.aws_ami.ubuntu" [label="data.aws_ami.ubuntu"];
+  "aws_instance.web" [label="aws_instance.web"];
+  "aws_key_pair.deployer" [label="aws_key_pair.deployer"];
+  "aws_security_group.allow_ssh" [label="aws_security_group.allow_ssh"];
+  "aws_instance.web" -> "data.aws_ami.ubuntu";
+  "aws_instance.web" -> "aws_key_pair.deployer";
+  "aws_instance.web" -> "aws_security_group.allow_ssh";
+}

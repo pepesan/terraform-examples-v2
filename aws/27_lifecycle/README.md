@@ -147,7 +147,7 @@ Terraform fallará con un error indicando que no puede destruir `critical_record
 
 ---
 
-## 🧹 Limpieza (opcional)
+## Limpieza (opcional)
 
 Para poder destruir todo:
 
