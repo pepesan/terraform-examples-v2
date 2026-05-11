@@ -38,17 +38,13 @@ module "eks" {
       name = "node-group-1"
       # Starting on 1.30, AL2023 is the default AMI type for EKS managed node groups
       ami_type       = "AL2023_x86_64_STANDARD"
-      attach_cluster_primary_security_group = true
+      attach_cluster_primary_security_group = false
       create_security_group                 = false
       instance_types = ["t3.small"]
 
       min_size     = 1
       max_size     = 3
       desired_size = 2
-
-      pre_bootstrap_user_data = <<-EOT
-      echo 'foo bar'
-      EOT
 
       vpc_security_group_ids = [
         aws_security_group.node_group_one.id,
@@ -60,17 +56,13 @@ module "eks" {
       name = "node-group-2"
       # Starting on 1.30, AL2023 is the default AMI type for EKS managed node groups
       ami_type       = "AL2023_x86_64_STANDARD"
-      attach_cluster_primary_security_group = true
+      attach_cluster_primary_security_group = false
       create_security_group                 = false
       instance_types = ["t3.medium"]
 
       min_size     = 1
       max_size     = 3
       desired_size = 2
-
-      pre_bootstrap_user_data = <<-EOT
-      echo 'foo bar'
-      EOT
 
       vpc_security_group_ids = [
         aws_security_group.node_group_two.id,

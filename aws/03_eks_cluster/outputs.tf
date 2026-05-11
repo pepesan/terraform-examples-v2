@@ -8,8 +8,11 @@ output "cluster_security_group_id" {
   value       = module.eks.cluster_security_group_id
 }
 
+# sensitive oculta el valor en logs y plan, pero no lo cifra en el state.
+# Para verlo: terraform output k8s_cluster_certificate_authority_data
 output "k8s_cluster_certificate_authority_data" {
-  value = base64decode(module.eks.cluster_certificate_authority_data)
+  value     = base64decode(module.eks.cluster_certificate_authority_data)
+  sensitive = true
 }
 
 output "region" {
@@ -20,4 +23,9 @@ output "region" {
 output "cluster_name" {
   description = "Kubernetes Cluster Name"
   value       = local.cluster_name
+}
+
+output "vpc_id" {
+  description = "VPC ID"
+  value       = module.vpc.vpc_id
 }
