@@ -11,10 +11,10 @@ provider "kubernetes" {
 }
 
 provider "helm" {
-  kubernetes {
+  kubernetes = {
     host                   = module.eks.cluster_endpoint
     cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
-    exec {
+    exec = {
       api_version = "client.authentication.k8s.io/v1beta1"
       command     = "aws"
       args        = ["eks", "get-token", "--cluster-name", local.cluster_name, "--region", var.region]
@@ -65,25 +65,12 @@ resource "helm_release" "alb_controller" {
   namespace  = "kube-system"
   version    = "3.3.0"
 
-  set {
-    name  = "clusterName"
-    value = local.cluster_name
-  }
-
-  set {
-    name  = "serviceAccount.create"
-    value = "true"
-  }
-
-  set {
-    name  = "region"
-    value = var.region
-  }
-
-  set {
-    name  = "vpcId"
-    value = module.vpc.vpc_id
-  }
+  set = [
+    { name = "clusterName",           value = local.cluster_name },
+    { name = "serviceAccount.create", value = "true" },
+    { name = "region",                value = var.region },
+    { name = "vpcId",                 value = module.vpc.vpc_id },
+  ]
 
   depends_on = [aws_eks_pod_identity_association.alb_controller]
 }
