@@ -66,10 +66,10 @@ resource "helm_release" "alb_controller" {
   version    = "3.3.0"
 
   set = [
-    { name = "clusterName",           value = local.cluster_name },
+    { name = "clusterName", value = local.cluster_name },
     { name = "serviceAccount.create", value = "true" },
-    { name = "region",                value = var.region },
-    { name = "vpcId",                 value = module.vpc.vpc_id },
+    { name = "region", value = var.region },
+    { name = "vpcId", value = module.vpc.vpc_id },
   ]
 
   depends_on = [aws_eks_pod_identity_association.alb_controller]

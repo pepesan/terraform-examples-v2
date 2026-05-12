@@ -65,26 +65,60 @@ aws eks --region $(terraform output -raw region) update-kubeconfig \
   --name $(terraform output -raw cluster_name)
 ```
 
-## Verificar conexión
+## Comprobación completa del despliegue
+
+### 1. Estado del cluster (AWS CLI)
 
 ```bash
-kubectl cluster-info
-kubectl get nodes
-kubectl get pods -A
+aws eks describe-cluster \
+  --name $(terraform output -raw cluster_name) \
+  --region $(terraform output -raw region) \
+  --query 'cluster.{status:status,version:version,endpoint:endpoint}'
 ```
 
-## Verificar el ALB Controller
+Resultado esperado: `"status": "ACTIVE"`
+
+### 2. Nodos
 
 ```bash
-kubectl get pods -n kube-system -l app.kubernetes.io/name=aws-load-balancer-controller
+kubectl get nodes -o wide
 ```
 
-## Verificar la aplicación nginx
+Resultado esperado: 4 nodos en estado `Ready` (2 por node group).
+
+### 3. Pods del sistema (kube-system)
 
 ```bash
-kubectl get all -n nginx-app
-kubectl get ingress -n nginx-app
+kubectl get pods -n kube-system
 ```
+
+Componentes esperados en estado `Running`:
+
+| Componente                   | Réplicas   |
+|------------------------------|------------|
+| aws-load-balancer-controller | 2          |
+| aws-node (vpc-cni)           | 1 por nodo |
+| coredns                      | 2          |
+| eks-pod-identity-agent       | 1 por nodo |
+| kube-proxy                   | 1 por nodo |
+
+### 4. Aplicación nginx
+
+```bash
+kubectl get pods -n nginx-app
+kubectl get svc -n nginx-app
+kubectl get ingress -n nginx-app -o wide
+```
+
+Resultado esperado: 2 pods `Running`, Service `ClusterIP` activo e Ingress con hostname ALB asignado.
+
+### 5. Test HTTP del endpoint
+
+```bash
+curl -s -o /dev/null -w "%{http_code}" $(terraform output -raw nginx_ingress_url)
+```
+
+Resultado esperado: `200`. Si devuelve error de conexión, espera ~2 min a que el ALB termine de registrar los targets.
 
 ---
 

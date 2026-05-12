@@ -2,12 +2,12 @@ variable "project_name" {}
 variable "region" {}
 
 provider "aws" {
-  region      = var.region
+  region = var.region
 }
 module "eks" {
-  source  = "terraform-aws-modules/eks/aws"
+  source = "terraform-aws-modules/eks/aws"
   #version = "21.15.1"
-  name    = local.cluster_name
+  name = local.cluster_name
   # ojo con la versión, cobran más por versiones antiguas
   kubernetes_version = "1.35"
 
@@ -15,12 +15,12 @@ module "eks" {
   subnet_ids = module.vpc.private_subnets
 
   addons = {
-    coredns                = {}
+    coredns = {}
     eks-pod-identity-agent = {
       before_compute = true
     }
-    kube-proxy             = {}
-    vpc-cni                = {
+    kube-proxy = {}
+    vpc-cni = {
       before_compute = true
     }
   }
@@ -37,10 +37,10 @@ module "eks" {
     one = {
       name = "node-group-1"
       # Starting on 1.30, AL2023 is the default AMI type for EKS managed node groups
-      ami_type       = "AL2023_x86_64_STANDARD"
+      ami_type                              = "AL2023_x86_64_STANDARD"
       attach_cluster_primary_security_group = false
       create_security_group                 = false
-      instance_types = ["t3.small"]
+      instance_types                        = ["t3.small"]
 
       min_size     = 1
       max_size     = 3
@@ -54,10 +54,10 @@ module "eks" {
     two = {
       name = "node-group-2"
       # Starting on 1.30, AL2023 is the default AMI type for EKS managed node groups
-      ami_type       = "AL2023_x86_64_STANDARD"
+      ami_type                              = "AL2023_x86_64_STANDARD"
       attach_cluster_primary_security_group = false
       create_security_group                 = false
-      instance_types = ["t3.medium"]
+      instance_types                        = ["t3.medium"]
 
       min_size     = 1
       max_size     = 3
