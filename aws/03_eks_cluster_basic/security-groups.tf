@@ -1,6 +1,7 @@
 resource "aws_security_group" "node_group_one" {
   name_prefix = "node_group_one"
   vpc_id      = module.vpc.vpc_id
+  tags        = { Name = "${local.cluster_name}-node-group-one" }
 
   ingress {
     from_port = 22
@@ -25,12 +26,14 @@ resource "aws_security_group" "node_group_one" {
 resource "aws_security_group" "node_service" {
   name_prefix = "node_service_nginx"
   vpc_id      = module.vpc.vpc_id
+  tags        = { Name = "${local.cluster_name}-node-service" }
 
   ingress {
     from_port = 30201
     to_port   = 30201
     protocol  = "tcp"
-
+    # los nodos están en subnets privadas; aunque el CIDR es 0.0.0.0/0,
+    # solo es alcanzable desde dentro de la VPC o a través del NLB
     cidr_blocks = ["0.0.0.0/0"]
   }
   egress {
@@ -45,6 +48,7 @@ resource "aws_security_group" "node_service" {
 resource "aws_security_group" "node_group_two" {
   name_prefix = "node_group_two"
   vpc_id      = module.vpc.vpc_id
+  tags        = { Name = "${local.cluster_name}-node-group-two" }
 
   ingress {
     from_port = 22

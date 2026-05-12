@@ -75,7 +75,16 @@ resource "helm_release" "alb_controller" {
   wait    = true # espera a que el pod esté Ready antes de continuar; sin esto el Ingress se crea antes de que el controller esté operativo
   timeout = 300
 
-  depends_on = [aws_eks_pod_identity_association.alb_controller]
+  depends_on = [aws_eks_pod_identity_association.alb_controller, time_sleep.wait_alb_cleanup]
+}
+
+# ─── Espera a que el ALB Controller limpie los ALBs y SGs antes del destroy ───
+
+resource "time_sleep" "wait_alb_cleanup" {
+  depends_on = [kubernetes_ingress_v1.headlamp, kubernetes_ingress_v1.nginx_app]
+  # en destroy espera 60s para que el ALB Controller elimine el ALB y sus SGs
+  # antes de que Terraform continúe borrando el cluster y el VPC
+  destroy_duration = "60s"
 }
 
 # ─── Headlamp Dashboard ───────────────────────────────────────────────────────
@@ -129,11 +138,25 @@ resource "kubernetes_ingress_v1" "headlamp" {
 
 # ─── Aplicación nginx ─────────────────────────────────────────────────────────
 
+# El ALB Controller crea TargetGroupBindings en este namespace con finalizers que
+# solo él puede eliminar. Si el controller ya no existe al borrar el namespace,
+# los finalizers bloquean el destroy. Este null_resource los limpia antes.
+resource "null_resource" "cleanup_nginx_tgb" {
+  provisioner "local-exec" {
+    when    = destroy
+    command = <<-EOT
+      kubectl get targetgroupbindings -n nginx-app -o name 2>/dev/null | \
+      xargs -r -I {} kubectl patch {} -n nginx-app \
+        -p '{"metadata":{"finalizers":[]}}' --type=merge 2>/dev/null || true
+    EOT
+  }
+}
+
 resource "kubernetes_namespace" "nginx_app" {
   metadata {
     name = "nginx-app"
   }
-  depends_on = [module.eks]
+  depends_on = [module.eks, null_resource.cleanup_nginx_tgb]
 }
 
 resource "kubernetes_deployment" "nginx_app" {
