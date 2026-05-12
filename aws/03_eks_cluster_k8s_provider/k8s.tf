@@ -36,8 +36,8 @@ resource "aws_iam_role" "alb_controller" {
     Version = "2012-10-17"
     Statement = [{
       Effect    = "Allow"
-      Principal = { Service = "pods.eks.amazonaws.com" }
-      Action    = ["sts:AssumeRole", "sts:TagSession"]
+      Principal = { Service = "pods.eks.amazonaws.com" } # Pod Identity usa este principal; IRSA usa el OIDC provider
+      Action    = ["sts:AssumeRole", "sts:TagSession"]   # Pod Identity requiere TagSession además de AssumeRole; IRSA no lo necesita
     }]
   })
 }
@@ -72,7 +72,59 @@ resource "helm_release" "alb_controller" {
     { name = "vpcId", value = module.vpc.vpc_id },
   ]
 
+  wait    = true # espera a que el pod esté Ready antes de continuar; sin esto el Ingress se crea antes de que el controller esté operativo
+  timeout = 300
+
   depends_on = [aws_eks_pod_identity_association.alb_controller]
+}
+
+# ─── Headlamp Dashboard ───────────────────────────────────────────────────────
+
+resource "helm_release" "headlamp" {
+  name       = "headlamp"
+  repository = "https://kubernetes-sigs.github.io/headlamp/"
+  chart      = "headlamp"
+  namespace  = "kube-system"
+
+  set = [
+    { name = "config.baseURL", value = "/headlamp" },
+  ]
+
+  depends_on = [module.eks]
+}
+
+resource "kubernetes_ingress_v1" "headlamp" {
+  metadata {
+    name      = "headlamp"
+    namespace = "kube-system"
+    annotations = {
+      "alb.ingress.kubernetes.io/scheme"           = "internet-facing"
+      "alb.ingress.kubernetes.io/target-type"      = "ip"         # apunta al pod directamente; necesario para IngressGroup cross-namespace
+      "alb.ingress.kubernetes.io/group.name"       = "eks-alb"   # IngressGroup: varios Ingress de distintos namespaces comparten un único ALB
+      "alb.ingress.kubernetes.io/group.order"      = "1"         # orden de evaluación de reglas dentro del grupo; menor número = mayor prioridad
+      "alb.ingress.kubernetes.io/healthcheck-path" = "/headlamp/" # la ruta "/" devuelve 404 en Headlamp, lo que marcaría los targets como unhealthy
+    }
+  }
+  spec {
+    ingress_class_name = "alb"
+    rule {
+      http {
+        path {
+          path      = "/headlamp"
+          path_type = "Prefix"
+          backend {
+            service {
+              name = "headlamp"
+              port {
+                number = 80
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  depends_on = [helm_release.alb_controller, helm_release.headlamp]
 }
 
 # ─── Aplicación nginx ─────────────────────────────────────────────────────────
@@ -132,7 +184,9 @@ resource "kubernetes_ingress_v1" "nginx_app" {
     namespace = kubernetes_namespace.nginx_app.metadata[0].name
     annotations = {
       "alb.ingress.kubernetes.io/scheme"      = "internet-facing"
-      "alb.ingress.kubernetes.io/target-type" = "ip"
+      "alb.ingress.kubernetes.io/target-type" = "ip"    # idem que headlamp: target-type ip para IngressGroup cross-namespace
+      "alb.ingress.kubernetes.io/group.name"  = "eks-alb"
+      "alb.ingress.kubernetes.io/group.order" = "2"     # prioridad 2: nginx va después de headlamp; la ruta "/" es el catch-all
     }
   }
   spec {

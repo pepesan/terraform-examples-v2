@@ -17,11 +17,11 @@ module "eks" {
   addons = {
     coredns = {}
     eks-pod-identity-agent = {
-      before_compute = true
+      before_compute = true # debe estar listo antes de que los nodos arranquen para que los pods tengan identidad desde el primer segundo
     }
     kube-proxy = {}
     vpc-cni = {
-      before_compute = true
+      before_compute = true # idem: sin el CNI los pods no tienen red; instalarlo antes evita que los nodos queden en NotReady
     }
   }
 

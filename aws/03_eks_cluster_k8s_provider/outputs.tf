@@ -30,7 +30,14 @@ output "vpc_id" {
   value       = module.vpc.vpc_id
 }
 
-output "nginx_ingress_url" {
-  description = "URL del ALB creado por el Ingress nginx (puede tardar ~2 min en estar disponible)"
-  value       = "http://${try(kubernetes_ingress_v1.nginx_app.status[0].load_balancer[0].ingress[0].hostname, "pendiente")}"
+locals {
+  alb_hostname = try(kubernetes_ingress_v1.nginx_app.status[0].load_balancer[0].ingress[0].hostname, "pendiente")
+}
+
+output "service_urls" {
+  description = "URLs de todos los servicios expuestos por el ALB"
+  value = {
+    nginx    = "http://${local.alb_hostname}/"
+    headlamp = "http://${local.alb_hostname}/headlamp/"
+  }
 }

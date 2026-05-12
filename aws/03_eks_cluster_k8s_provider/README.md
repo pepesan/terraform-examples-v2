@@ -3,7 +3,7 @@
 Despliega un cluster EKS en AWS con:
 - VPC dedicada, subnets públicas/privadas y dos grupos de nodos gestionados
 - **AWS Load Balancer Controller** instalado automáticamente vía Helm
-- **Aplicación nginx** expuesta a internet mediante un ALB gestionado por Kubernetes Ingress
+- **Aplicación nginx** y **Headlamp dashboard** expuestos a internet mediante un único ALB compartido, gestionado por Kubernetes Ingress con IngressGroup
 
 Todo se gestiona con Terraform usando los providers `aws`, `kubernetes` y `helm`.
 
@@ -35,16 +35,30 @@ terraform init
 # Paso 1: crear el cluster EKS y la VPC
 terraform apply -target=module.eks -target=module.vpc
 
-# Paso 2: desplegar el ALB Controller y la aplicación nginx
+# Paso 2: desplegar el ALB Controller, nginx y Headlamp
 terraform apply
 ```
 
-Al finalizar el segundo apply, el output `nginx_ingress_url` mostrará la URL del ALB. El ALB puede tardar ~2 min en estar activo; si el output devuelve `http://pendiente`, espera un momento y vuelve a ejecutar `terraform output`:
+Al finalizar el segundo apply, el output `service_urls` mostrará las URLs de todos los servicios. El ALB puede tardar ~2 min en estar activo; si el output devuelve `http://pendiente`, espera un momento y vuelve a ejecutar `terraform output`:
 
 ```bash
-terraform output nginx_ingress_url
-curl $(terraform output -raw nginx_ingress_url)
+terraform output service_urls
 ```
+
+O bien obtén el hostname directamente desde el Ingress:
+
+```bash
+kubectl get ingress nginx -n nginx-app -o jsonpath='{.status.loadBalancer.ingress[0].hostname}'
+```
+
+Con ese hostname, los servicios son accesibles en:
+
+| Servicio  | URL                                    |
+|-----------|----------------------------------------|
+| nginx     | `http://<hostname>/`                   |
+| Headlamp  | `http://<hostname>/headlamp/`          |
+
+Ambos comparten el mismo ALB gracias al `alb.ingress.kubernetes.io/group.name: eks-alb` definido en sus respectivos Ingress.
 
 # Destrucción de la infraestructura
 
@@ -115,7 +129,8 @@ Resultado esperado: 2 pods `Running`, Service `ClusterIP` activo e Ingress con h
 ### 5. Test HTTP del endpoint
 
 ```bash
-curl -s -o /dev/null -w "%{http_code}" $(terraform output -raw nginx_ingress_url)
+ALB=$(kubectl get ingress nginx -n nginx-app -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+curl -s -o /dev/null -w "%{http_code}" "http://$ALB/"
 ```
 
 Resultado esperado: `200`. Si devuelve error de conexión, espera ~2 min a que el ALB termine de registrar los targets.
@@ -124,30 +139,29 @@ Resultado esperado: `200`. Si devuelve error de conexión, espera ~2 min a que e
 
 # Dashboard web — Headlamp
 
-Headlamp es el sucesor del Kubernetes Dashboard oficial (archivado en 2026). Se instala en el cluster con Helm y se accede mediante port-forward local.
+Headlamp es el sucesor del Kubernetes Dashboard oficial (archivado en enero de 2026). Se despliega automáticamente como parte del `terraform apply` mediante un `helm_release` en `k8s.tf`, y está expuesto públicamente a través del mismo ALB que nginx.
 
-```bash
-helm repo add headlamp https://kubernetes-sigs.github.io/headlamp/
-helm repo update
-helm install headlamp headlamp/headlamp --namespace kube-system
-```
+## Verificar que está corriendo
 
 ```bash
 kubectl get pods -n kube-system -l app.kubernetes.io/name=headlamp
+kubectl get ingress headlamp -n kube-system -o wide
 ```
 
+## Acceder al dashboard
+
+La URL completa está disponible directamente en el output de Terraform:
+
 ```bash
-kubectl --namespace kube-system port-forward \
-  $(kubectl get pods --namespace kube-system -l "app.kubernetes.io/name=headlamp,app.kubernetes.io/instance=headlamp" -o jsonpath="{.items[0].metadata.name}") \
-  8080:4466
+terraform output service_urls
 ```
+
+Accede en `http://<hostname>/headlamp/` (con barra final).
+
+Genera un token de acceso para autenticarte:
 
 ```bash
 kubectl create token headlamp --namespace kube-system
 ```
 
-Accede en `http://localhost:8080` y pega el token para autenticarte.
-
-```bash
-helm uninstall headlamp -n kube-system
-```
+Pega el token en la pantalla de login de Headlamp.
