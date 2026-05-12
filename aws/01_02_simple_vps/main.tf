@@ -4,12 +4,13 @@ provider "aws" {
 
 data "aws_ami" "ubuntu" {
   most_recent = true
-
+  # Comando de AWS CLI:
+  # aws ec2 describe-images   --owners 099720109477   --filters 'Name=name,Values=ubuntu/images/hvm-ssd-gp3/ubuntu-resolute-26.04-amd64-server-*'  --output json   --region eu-west-3
   filter {
     name = "name"
     # values = ["ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-*"]
-    #values = ["ubuntu/images/hvm-ssd-gp3/ubuntu-noble-24.04-amd64-server-*"]
-    values = ["ubuntu/images/hvm-ssd-gp3/ubuntu-noble-26.04-amd64-server-*"]
+    # values = ["ubuntu/images/hvm-ssd-gp3/ubuntu-noble-24.04-amd64-server-*"]
+    values = ["ubuntu/images/hvm-ssd-gp3/ubuntu-resolute-26.04-amd64-server-*"]
   }
   filter {
     name   = "root-device-type"
@@ -42,6 +43,11 @@ variable "vpc_id" {
 variable "project_name" {
   type    = string
   default = "profe"
+}
+
+variable "environment_name" {
+  type    = string
+  default = "DEV"
 }
 
 resource "aws_key_pair" "deployer" {
@@ -82,7 +88,9 @@ resource "aws_instance" "web" {
     aws_security_group.allow_ssh.id
   ]
   tags = {
-    Name = "HelloWorld-${var.project_name}"
+    Name        = "HelloWorld-${var.project_name}"
+    Environment = var.environment_name
+    Client      = "Vodafone"
   }
   # ejecución de comandos desde la maquina que lanza terraform
   provisioner "local-exec" {
@@ -100,6 +108,10 @@ resource "aws_instance" "web" {
       "echo hola >> fichero.txt"
     ]
   }
+}
+
+output "ami_id" {
+  value = data.aws_ami.ubuntu.id
 }
 
 output "ip_instance" {

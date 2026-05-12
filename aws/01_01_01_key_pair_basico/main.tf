@@ -12,6 +12,8 @@ variable "ssh_key_path" {
 }
 
 resource "aws_key_pair" "deployer" {
+  # Por defecto este valor sería
+  # "deployer-key-ubuntu-profe-test"
   key_name   = "deployer-key-ubuntu-${var.project_name}-test"
   public_key = file(var.ssh_key_path)
 }
