@@ -124,7 +124,7 @@ resource "kubernetes_ingress_v1" "headlamp" {
       }
     }
   }
-  depends_on = [helm_release.alb_controller, helm_release.headlamp]
+  depends_on = [helm_release.alb_controller, helm_release.headlamp, module.eks]
 }
 
 # ─── Aplicación nginx ─────────────────────────────────────────────────────────
@@ -208,5 +208,5 @@ resource "kubernetes_ingress_v1" "nginx_app" {
       }
     }
   }
-  depends_on = [helm_release.alb_controller]
+  depends_on = [helm_release.alb_controller, module.eks]
 }
