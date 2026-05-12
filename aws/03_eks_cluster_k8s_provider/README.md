@@ -31,17 +31,27 @@ Edita `terraform.tfvars` con tu `project_name` y `region`.
 
 ```bash
 terraform init
+```
 
-# Paso 1: crear el cluster EKS y la VPC
+**Paso 1 — Crear el cluster EKS y la VPC:**
+
+```bash
 terraform apply -target=module.eks -target=module.vpc
 
-# Paso 2: desplegar el ALB Controller, nginx y Headlamp
+aws eks --region $(terraform output -raw region) update-kubeconfig \
+  --name $(terraform output -raw cluster_name)
+```
+
+**Paso 2 — Desplegar el ALB Controller, nginx y Headlamp:**
+
+```bash
 terraform apply
 ```
 
-Al finalizar el segundo apply, el output `service_urls` mostrará las URLs de todos los servicios. El ALB puede tardar ~2 min en estar activo; si el output devuelve `http://pendiente`, espera un momento y vuelve a ejecutar `terraform output`:
+El output `service_urls` mostrará las URLs de todos los servicios. El ALB puede tardar ~2 min en estar activo. Si el output devuelve `http://pendiente`, el hostname aún no se ha asignado o se asignó después de que Terraform terminó; refresca el state y vuelve a consultar — puede que necesites repetirlo varias veces hasta que el ALB esté listo:
 
 ```bash
+terraform apply -refresh-only
 terraform output service_urls
 ```
 
