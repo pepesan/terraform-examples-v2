@@ -15,6 +15,7 @@ resource "aws_ebs_volume" "web" {
     Name = "${var.project_name}-web-ebs"
   }
 }
+
 resource "aws_security_group" "allow_ssh" {
   name        = "allow_ssh_${var.project_name}"
   description = "Allow SSH inbound traffic"
