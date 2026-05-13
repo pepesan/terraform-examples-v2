@@ -1,8 +1,8 @@
 module "vpc" {
-  source               = "terraform-aws-modules/vpc/aws"
-  name                 = "vpc-main"
-  cidr                 = "10.0.0.0/16"
-  azs                  = [
+  source = "terraform-aws-modules/vpc/aws"
+  name   = "vpc-main"
+  cidr   = "10.0.0.0/16"
+  azs = [
     var.availability_zone_a,
     var.availability_zone_b,
     var.availability_zone_c
