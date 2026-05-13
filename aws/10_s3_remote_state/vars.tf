@@ -1,10 +1,10 @@
 variable "project_name" {
-  type = string
+  type    = string
   default = "cdd"
 }
 variable "region" {
-  type = string
-  default = "region"
+  type    = string
+  default = "eu-west-3"
 }
 
 variable "ssh_key_path" {
