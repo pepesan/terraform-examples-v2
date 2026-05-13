@@ -32,18 +32,25 @@ resource "aws_instance" "web" {
   ami           = data.aws_ami.ubuntu.id
   instance_type = "t3.micro"
   key_name      = aws_key_pair.deployer.key_name
+
+  # Subred obtenida del datasource: primera subred de la zona de disponibilidad
+  subnet_id                   = data.aws_subnet.target.id
+  associate_public_ip_address = true
+
   vpc_security_group_ids = [
     aws_security_group.allow_ssh.id
   ]
+
   tags = {
     Name        = "HelloWorld-${var.project_name}"
     Environment = var.environment_name
     Client      = "Vodafone"
   }
-  # ejecución de comandos desde la maquina que lanza terraform
+
   provisioner "local-exec" {
     command = "echo The ssh id is ${self.id}, and public ip: ${self.public_ip} >> salida_terraform.txt"
   }
+
   connection {
     type        = "ssh"
     user        = "ubuntu"

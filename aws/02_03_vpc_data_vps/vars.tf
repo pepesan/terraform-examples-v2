@@ -1,5 +1,11 @@
 variable "vpc_id" {
-  type = string
+  type        = string
+  description = "ID directo de la VPC (estrategia 1)"
+}
+
+variable "vpc_name" {
+  type        = string
+  description = "Tag Name de la VPC (estrategias 2 y 3)"
 }
 
 variable "project_name" {
@@ -20,10 +26,10 @@ variable "availability_zone" {
 variable "ssh_key_path" {
   type = string
 }
+
 variable "ssh_key_private_path" {
   type = string
 }
-
 
 variable "environment_name" {
   type    = string

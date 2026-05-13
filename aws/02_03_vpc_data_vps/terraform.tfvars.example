@@ -1,7 +1,14 @@
-project_name              = "terraform"
-region_name               = "eu-west-3"
-availability_zone         = "eu-west-3a"
-vpc_id                    = "vpc-c2df3aaa"
-ssh_key_path              = "ruta clave publica ssh"
-ssh_key_private_path      = "ruta clave privada ssh"
-environment_name          = "DEV"
+project_name         = "terraform"
+region_name          = "eu-west-3"
+availability_zone    = "eu-west-3a"
+
+# Estrategia 1: ID directo de la VPC
+vpc_id               = "vpc-c2df3aaa"
+
+# Estrategias 2 y 3: nombre de la VPC (tag Name).
+# La estrategia 3 combina vpc_name + environment_name para mayor precisión.
+vpc_name             = "nombre-de-tu-vpc"
+
+environment_name     = "DEV"
+ssh_key_path         = "ruta clave publica ssh"
+ssh_key_private_path = "ruta clave privada ssh"
