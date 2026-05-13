@@ -1,4 +1,3 @@
-variable "vpc_id" {}
 # Vpc disponibles
 data "aws_vpcs" "vpcs" {}
 

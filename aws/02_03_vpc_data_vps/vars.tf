@@ -16,3 +16,16 @@ variable "availability_zone" {
   type    = string
   default = "eu-west-3a"
 }
+
+variable "ssh_key_path" {
+  type = string
+}
+variable "ssh_key_private_path" {
+  type = string
+}
+
+
+variable "environment_name" {
+  type    = string
+  default = "DEV"
+}
