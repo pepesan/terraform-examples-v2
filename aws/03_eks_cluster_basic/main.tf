@@ -1,13 +1,7 @@
-variable "project_name" {}
-variable "region" {}
-
-provider "aws" {
-  region      = var.region
-}
 module "eks" {
-  source  = "terraform-aws-modules/eks/aws"
+  source = "terraform-aws-modules/eks/aws"
   #version = "21.15.1"
-  name    = local.cluster_name
+  name = local.cluster_name
   # ojo con la versión, cobran más por versiones antiguas
   kubernetes_version = "1.35"
 
@@ -15,12 +9,12 @@ module "eks" {
   subnet_ids = module.vpc.private_subnets
 
   addons = {
-    coredns                = {}
+    coredns = {}
     eks-pod-identity-agent = {
       before_compute = true # debe estar listo antes de que los nodos arranquen para que los pods tengan identidad desde el primer segundo
     }
-    kube-proxy             = {}
-    vpc-cni                = {
+    kube-proxy = {}
+    vpc-cni = {
       before_compute = true # idem: sin el CNI los pods no tienen red; instalarlo antes evita que los nodos queden en NotReady
     }
   }
@@ -30,12 +24,12 @@ module "eks" {
   enable_cluster_creator_admin_permissions = true # añade la identidad IAM que ejecuta Terraform como admin del cluster vía access entry
 
   eks_managed_node_groups = {
-    one = {
-      name           = "node-group-1"
-      ami_type       = "AL2023_x86_64_STANDARD"
+    one =   {
+      name                                  = "node-group-1"
+      ami_type                              = "AL2023_x86_64_STANDARD"
       attach_cluster_primary_security_group = false # no adjuntar el SG del cluster a los nodos; gestionamos el acceso con nuestros propios SGs
       create_security_group                 = false # idem: el módulo no crea SG adicional, usamos los definidos en security-groups.tf
-      instance_types = ["t3.small"]
+      instance_types                        = ["t3.small"]
 
       min_size     = 1
       max_size     = 3
@@ -48,11 +42,11 @@ module "eks" {
     }
 
     two = {
-      name           = "node-group-2"
-      ami_type       = "AL2023_x86_64_STANDARD"
+      name                                  = "node-group-2"
+      ami_type                              = "AL2023_x86_64_STANDARD"
       attach_cluster_primary_security_group = false
       create_security_group                 = false
-      instance_types = ["t3.medium"]
+      instance_types                        = ["t3.medium"]
 
       min_size     = 1
       max_size     = 3
