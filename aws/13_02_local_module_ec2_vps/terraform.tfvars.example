@@ -1,0 +1,6 @@
+# Aquí va la clave SSH pública
+ssh_key_path="ruta fichero ssh.pub"
+ssh_key_private_path="ruta fichero ssh privado"
+vpc_id="vpc-XXXXXX"
+project_name="terraform"
+environment_name="DEV"
