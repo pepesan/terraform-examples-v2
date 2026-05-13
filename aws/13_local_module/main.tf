@@ -8,11 +8,11 @@ variable "mivar" {
 }
 
 module "llamada" {
-  source="./modules/mimodulo"
-  mivar = var.mivar
-  
+  source = "./modules/mimodulo"
+  mivarentrada  = var.mivar
+
 }
 
 output "salida-main" {
-  value =module.llamada.salida
+  value = module.llamada.salida
 }

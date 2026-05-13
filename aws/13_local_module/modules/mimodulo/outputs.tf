@@ -1,3 +1,3 @@
 output "salida" {
-  value=var.mivar
+  value=var.mivarentrada
 }

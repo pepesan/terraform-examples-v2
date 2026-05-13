@@ -1,3 +1,3 @@
-variable "mivar" {
+variable "mivarentrada" {
   default = "valor"
 }
