@@ -74,8 +74,8 @@ resource "helm_release" "alb_controller" {
 
   wait    = true # espera a que el pod esté Ready antes de continuar; sin esto el Ingress se crea antes de que el controller esté operativo
   timeout = 300
-
-  depends_on = [aws_eks_pod_identity_association.alb_controller, time_sleep.wait_alb_cleanup]
+  # comentado esta dependencias por error ciclico: time_sleep.wait_alb_cleanup
+  depends_on = [aws_eks_pod_identity_association.alb_controller]
 }
 
 # ─── Espera a que el ALB Controller limpie los ALBs y SGs antes del destroy ───
@@ -109,8 +109,8 @@ resource "kubernetes_ingress_v1" "headlamp" {
     annotations = {
       "alb.ingress.kubernetes.io/scheme"           = "internet-facing"
       "alb.ingress.kubernetes.io/target-type"      = "ip"         # apunta al pod directamente; necesario para IngressGroup cross-namespace
-      "alb.ingress.kubernetes.io/group.name"       = "eks-alb"   # IngressGroup: varios Ingress de distintos namespaces comparten un único ALB
-      "alb.ingress.kubernetes.io/group.order"      = "1"         # orden de evaluación de reglas dentro del grupo; menor número = mayor prioridad
+      "alb.ingress.kubernetes.io/group.name"       = "eks-alb"    # IngressGroup: varios Ingress de distintos namespaces comparten un único ALB
+      "alb.ingress.kubernetes.io/group.order"      = "1"          # orden de evaluación de reglas dentro del grupo; menor número = mayor prioridad
       "alb.ingress.kubernetes.io/healthcheck-path" = "/headlamp/" # la ruta "/" devuelve 404 en Headlamp, lo que marcaría los targets como unhealthy
     }
   }
@@ -207,9 +207,9 @@ resource "kubernetes_ingress_v1" "nginx_app" {
     namespace = kubernetes_namespace.nginx_app.metadata[0].name
     annotations = {
       "alb.ingress.kubernetes.io/scheme"      = "internet-facing"
-      "alb.ingress.kubernetes.io/target-type" = "ip"    # idem que headlamp: target-type ip para IngressGroup cross-namespace
+      "alb.ingress.kubernetes.io/target-type" = "ip" # idem que headlamp: target-type ip para IngressGroup cross-namespace
       "alb.ingress.kubernetes.io/group.name"  = "eks-alb"
-      "alb.ingress.kubernetes.io/group.order" = "2"     # prioridad 2: nginx va después de headlamp; la ruta "/" es el catch-all
+      "alb.ingress.kubernetes.io/group.order" = "2" # prioridad 2: nginx va después de headlamp; la ruta "/" es el catch-all
     }
   }
   spec {
