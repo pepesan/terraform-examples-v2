@@ -15,7 +15,7 @@ provider "docker" {
 # Sustituye el valor de id por el ID completo (64 chars) del contenedor Docker a importar.
 # Ejecución: docker inspect hashicorp-learn --format "{{.Id}}"
 import {
-  id = "81b067be13b796140f19f133a6cf5da5f8a75ae7a632bf95bdcba2bbd3185d08"
+  id = "ID_LARGO_CONTENEDOR"
   to = docker_container.web
 }
 
