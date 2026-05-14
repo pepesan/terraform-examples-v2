@@ -1,37 +1,80 @@
 # Ejemplo de importación de recursos en Terraform
-## Requisitos:
-Tener docker instalado y en ejecución.
 
-### Crear un contenedor de nginx
+Este ejemplo muestra cómo importar un recurso existente en Terraform usando el **bloque `import`** (método nativo desde Terraform 1.5), en lugar del comando clásico `terraform import`.
+
+## Requisitos
+
+- Terraform >= 1.5
+- Docker instalado y en ejecución
+
+## Pasos
+
+### 1. Crear un contenedor Docker existente
+
 ```bash
 docker run --name hashicorp-learn --detach --publish "0.0.0.0:8080:80" nginx:latest
 ```
 
-Extraer el ID del contenedor
+> **Importante:** el provider de Docker solo puede importar contenedores en ejecución. Si el contenedor está parado, arráncalo antes de continuar: `docker start <CONTAINER_ID>`
 
-## Pasos para importar recursos existentes en Terraform:
-### Inicializar el directorio de trabajo
+### 2. Obtener el ID completo del contenedor
+
+El provider de Docker requiere el **ID completo** (64 caracteres), no el ID corto que muestra `docker ps`.
+
 ```bash
-terraform init
+docker inspect hashicorp-learn --format "{{.Id}}"
 ```
-### Modificar el fichero main.tf para añadir ID del contenedor
+
+### 3. Actualizar `main.tf` con el ID del contenedor
+
+Reemplaza `CONTAINER_ID` en el bloque `import` con el ID obtenido en el paso anterior:
+
 ```hcl
 import {
   id = "ID del contenedor Docker a importar"
   to = docker_container.web
 }
 ```
-### Importar el recurso a Terraform
+
+### 4. Inicializar el directorio de trabajo
+
+```bash
+terraform init
+```
+
+### 5. Generar la configuración del recurso importado
+
 ```bash
 terraform plan -generate-config-out=generated.tf
 ```
 
-Habrá generado el ficheor generated.tf con la configuración del recurso importado, pero aún no se ha aplicado ningún cambio.
-### Aplicar los cambios a la infraestructura
+Terraform genera el fichero `generated.tf` con el bloque `resource "docker_container" "web"` completo, pero aún no aplica ningún cambio.
+
+### 6. Aplicar los cambios
+
 ```bash
 terraform apply
 ```
-### Verificar que el recurso se ha importado correctamente
+
+El recurso queda gestionado por Terraform.
+
+### 7. Verificar que el recurso se ha importado correctamente
+
 ```bash
 terraform state list
 ```
+
+## Limpieza
+
+```bash
+terraform destroy
+docker rm -f hashicorp-learn
+```
+
+## Diferencia entre `import` block y `terraform import`
+
+| Característica                    | Bloque `import` (≥ 1.5)      | Comando `terraform import` |
+|-----------------------------------|------------------------------|----------------------------|
+| Declarativo                       | Sí                           | No                         |
+| Genera configuración              | Sí (`-generate-config-out`)  | No                         |
+| Se puede revisar antes de aplicar | Sí (`terraform plan`)        | No                         |
