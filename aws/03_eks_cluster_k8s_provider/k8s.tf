@@ -82,9 +82,9 @@ resource "helm_release" "alb_controller" {
 
 resource "time_sleep" "wait_alb_cleanup" {
   depends_on = [kubernetes_ingress_v1.headlamp, kubernetes_ingress_v1.blog]
-  # en destroy espera 60s para que el ALB Controller elimine el ALB y sus SGs
+  # en destroy espera 300s para que el ALB Controller elimine el ALB y sus SGs
   # antes de que Terraform continúe borrando el cluster y el VPC
-  destroy_duration = "60s"
+  destroy_duration = "300s"
 }
 
 # ─── Headlamp Dashboard ───────────────────────────────────────────────────────
