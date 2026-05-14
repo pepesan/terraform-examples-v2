@@ -31,13 +31,13 @@ output "vpc_id" {
 }
 
 locals {
-  alb_hostname = try(kubernetes_ingress_v1.nginx_app.status[0].load_balancer[0].ingress[0].hostname, "pendiente")
+  alb_hostname = try(kubernetes_ingress_v1.blog.status[0].load_balancer[0].ingress[0].hostname, "pendiente")
 }
 
 output "service_urls" {
   description = "URLs de todos los servicios expuestos por el ALB"
   value = {
-    nginx    = "http://${local.alb_hostname}/"
     headlamp = "http://${local.alb_hostname}/headlamp/"
+    blog = "http://${local.alb_hostname}/"
   }
 }

@@ -3,7 +3,7 @@
 Despliega un cluster EKS en AWS con:
 - VPC dedicada, subnets públicas/privadas y dos grupos de nodos gestionados
 - **AWS Load Balancer Controller** instalado automáticamente vía Helm
-- **Aplicación nginx** y **Headlamp dashboard** expuestos a internet mediante un único ALB compartido, gestionado por Kubernetes Ingress con IngressGroup
+- **Blog Astro** y **Headlamp dashboard** expuestos a internet mediante un único ALB compartido, gestionado por Kubernetes Ingress con IngressGroup
 
 Todo se gestiona con Terraform usando los providers `aws`, `kubernetes` y `helm`.
 
@@ -41,8 +41,14 @@ terraform apply -target=module.eks -target=module.vpc
 aws eks --region $(terraform output -raw region) update-kubeconfig \
   --name $(terraform output -raw cluster_name)
 ```
+Comprobar el acceso al cluster
+```bash
+kubectl cluster-info
+kubectl get nodes
+kubectl get pods -A
+```
 
-**Paso 2 — Desplegar el ALB Controller, nginx y Headlamp:**
+**Paso 2 — Desplegar el ALB Controller, el blog y Headlamp:**
 
 ```bash
 terraform apply
@@ -58,14 +64,14 @@ terraform output service_urls
 O bien obtén el hostname directamente desde el Ingress:
 
 ```bash
-kubectl get ingress nginx -n nginx-app -o jsonpath='{.status.loadBalancer.ingress[0].hostname}'
+kubectl get ingress blog -n blog -o jsonpath='{.status.loadBalancer.ingress[0].hostname}'
 ```
 
 Con ese hostname, los servicios son accesibles en:
 
 | Servicio  | URL                                    |
 |-----------|----------------------------------------|
-| nginx     | `http://<hostname>/`                   |
+| Blog      | `http://<hostname>/`                   |
 | Headlamp  | `http://<hostname>/headlamp/`          |
 
 Ambos comparten el mismo ALB gracias al `alb.ingress.kubernetes.io/group.name: eks-alb` definido en sus respectivos Ingress.
@@ -126,12 +132,12 @@ Componentes esperados en estado `Running`:
 | eks-pod-identity-agent       | 1 por nodo |
 | kube-proxy                   | 1 por nodo |
 
-### 4. Aplicación nginx
+### 4. Blog Astro
 
 ```bash
-kubectl get pods -n nginx-app
-kubectl get svc -n nginx-app
-kubectl get ingress -n nginx-app -o wide
+kubectl get pods -n blog
+kubectl get svc -n blog
+kubectl get ingress blog -n blog -o wide
 ```
 
 Resultado esperado: 2 pods `Running`, Service `ClusterIP` activo e Ingress con hostname ALB asignado.
@@ -139,7 +145,7 @@ Resultado esperado: 2 pods `Running`, Service `ClusterIP` activo e Ingress con h
 ### 5. Test HTTP del endpoint
 
 ```bash
-ALB=$(kubectl get ingress nginx -n nginx-app -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+ALB=$(kubectl get ingress blog -n blog -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
 curl -s -o /dev/null -w "%{http_code}" "http://$ALB/"
 ```
 
@@ -149,7 +155,7 @@ Resultado esperado: `200`. Si devuelve error de conexión, espera ~2 min a que e
 
 # Dashboard web — Headlamp
 
-Headlamp es el sucesor del Kubernetes Dashboard oficial (archivado en enero de 2026). Se despliega automáticamente como parte del `terraform apply` mediante un `helm_release` en `k8s.tf`, y está expuesto públicamente a través del mismo ALB que nginx.
+Headlamp es el sucesor del Kubernetes Dashboard oficial (archivado en enero de 2026). Se despliega automáticamente como parte del `terraform apply` mediante un `helm_release` en `k8s.tf`, y está expuesto públicamente a través del mismo ALB que el blog.
 
 ## Verificar que está corriendo
 
@@ -175,3 +181,14 @@ kubectl create token headlamp --namespace kube-system
 ```
 
 Pega el token en la pantalla de login de Headlamp.
+
+## Como evitar los problemas en la destrucción
+
+```shell
+ kubectl patch ingress headlamp -n kube-system \
+    -p '{"metadata":{"finalizers":[]}}' --type=merge
+
+  # Remove finalizer from blog ingress
+  kubectl patch ingress blog -n blog \
+    -p '{"metadata":{"finalizers":[]}}' --type=merge
+```
