@@ -78,11 +78,82 @@ Ambos comparten el mismo ALB gracias al `alb.ingress.kubernetes.io/group.name: e
 
 # Destrucción de la infraestructura
 
-Terraform destruye los recursos en el orden correcto automáticamente: primero el Ingress (lo que provoca que el ALB Controller elimine el Load Balancer de AWS), luego el Helm release del controller, y finalmente el cluster. Si el destroy falla a medias y el controller ya no está activo, el LB puede quedar huérfano en AWS y habría que borrarlo manualmente desde la consola o con `aws elbv2 delete-load-balancer`.
-
 ```bash
 terraform destroy
 ```
+
+Terraform destruye los recursos en orden: primero los Ingress (lo que provoca que el ALB Controller elimine el ALB de AWS), luego el Helm release del controller y finalmente el cluster y la VPC. El proceso normal tarda ~10-15 minutos.
+
+## Problemas frecuentes durante el destroy
+
+El ALB Controller gestiona recursos de AWS (ALB, Target Groups, Security Groups) **fuera del estado de Terraform**. Si el controller se elimina antes de que acabe su limpieza, esos recursos quedan huérfanos y bloquean el destroy. A continuación se documentan los tres fallos más comunes y cómo resolverlos.
+
+### 1. Ingress atascado en Terminating (5+ min)
+
+**Causa:** el ALB Controller pone un finalizer `ingress.k8s.aws/resources` en cada Ingress. Si el controller muere antes de procesarlo, el Ingress nunca sale de Terminating.
+
+**Solución:** eliminar los finalizers manualmente para desbloquear la eliminación:
+
+```bash
+kubectl patch ingress headlamp -n kube-system \
+  -p '{"metadata":{"finalizers":[]}}' --type=merge
+
+kubectl patch ingress blog -n blog \
+  -p '{"metadata":{"finalizers":[]}}' --type=merge
+```
+
+### 2. Namespace `blog` atascado en Terminating
+
+**Causa:** el ALB Controller crea un recurso `TargetGroupBinding` en el namespace para vincular el Service al Target Group de AWS. Si el controller ya no está, su finalizer `elbv2.k8s.aws/resources` nunca se elimina y bloquea al namespace.
+
+**Solución:**
+
+```bash
+# Identificar el TargetGroupBinding bloqueado
+kubectl get targetgroupbindings -n blog
+
+# Eliminar su finalizer (sustituir <name> por el nombre real)
+kubectl patch targetgroupbinding <name> -n blog \
+  -p '{"metadata":{"finalizers":[]}}' --type=merge
+```
+
+Si el namespace sigue bloqueado tras limpiar los finalizers de recursos internos:
+
+```bash
+kubectl get namespace blog -o json \
+  | jq '.spec.finalizers = []' \
+  | kubectl replace --raw /api/v1/namespaces/blog/finalize -f -
+```
+
+### 3. VPC atascada en Destroying (5+ min)
+
+**Causa:** el ALB Controller crea Security Groups propios (prefijo `k8s-`) para el ALB y el tráfico. AWS no permite eliminar una VPC mientras tenga Security Groups asociados, y Terraform no conoce estos SGs porque los creó el controller, no Terraform.
+
+**Solución:**
+
+```bash
+VPC_ID=<vpc-id>   # obtener del output de Terraform o del error
+
+# Localizar los SGs huérfanos (los del controller tienen prefijo k8s-)
+aws ec2 describe-security-groups \
+  --filters "Name=vpc-id,Values=$VPC_ID" \
+  --query "SecurityGroups[?GroupName!='default'].{Name:GroupName,ID:GroupId}"
+
+# Eliminarlos (el de tráfico primero para evitar DependencyViolation)
+aws ec2 delete-security-group --group-id <sg-traffic-id>
+aws ec2 delete-security-group --group-id <sg-alb-id>
+```
+
+Si alguno falla con `DependencyViolation`, hay una regla que referencia al otro SG; revocarla primero:
+
+```bash
+aws ec2 revoke-security-group-ingress \
+  --group-id <sg-id> --source-group <other-sg-id> --protocol -1
+
+aws ec2 delete-security-group --group-id <sg-id>
+```
+
+Una vez eliminados los SGs, la VPC se destruye en segundos.
 
 ---
 
@@ -181,14 +252,3 @@ kubectl create token headlamp --namespace kube-system
 ```
 
 Pega el token en la pantalla de login de Headlamp.
-
-## Como evitar los problemas en la destrucción
-
-```shell
- kubectl patch ingress headlamp -n kube-system \
-    -p '{"metadata":{"finalizers":[]}}' --type=merge
-
-  # Remove finalizer from blog ingress
-  kubectl patch ingress blog -n blog \
-    -p '{"metadata":{"finalizers":[]}}' --type=merge
-```
