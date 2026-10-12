@@ -1,0 +1,47 @@
+# Las 4 primeras variables (endpoint y credenciales) se pueden omitir si se
+# exportan como OVH_ENDPOINT, OVH_APPLICATION_KEY, OVH_APPLICATION_SECRET y
+# OVH_CONSUMER_KEY: el provider las lee del entorno.
+
+# Endpoint de la API de OVH. Para cuentas de ovh.com (Europa) usar "ovh-eu".
+ovh_endpoint = "ovh-eu"
+
+# Credenciales de la aplicación OVH API. El token necesita permisos sobre
+# /cloud/project/* (instancias) Y sobre /domain/zone/* (registros DNS): los 4
+# métodos GET/POST/PUT/DELETE en cada ruta.
+ovh_application_key    = "APPLICATION_KEY"
+ovh_application_secret = "APPLICATION_SECRET"
+ovh_consumer_key       = "CONSUMER_KEY"
+
+# Identificador del proyecto Public Cloud (ver README general de ovh)
+ovh_public_cloud_project_id = "PROJECT_ID"
+
+# Región donde crear las instancias (ver el output available_regions del
+# ejemplo 01_provider_config)
+region = "GRA11"
+
+# Nodos a crear: UNA máquina y UN registro DNS <nombre>.<domain> por cada
+# nombre. Sin repetidos, en minúsculas/números/guiones. Añadir o quitar un
+# nombre solo crea o destruye esa máquina; las demás no se tocan.
+nodes = ["nodo01", "nodo02", "nodo03"]
+
+# Dominio ya dado de alta en tu cuenta de OVH
+domain = "virtlabs.es"
+
+# Clave SSH compartida por todos los nodos (su nombre no debe existir ya en
+# el proyecto) y ruta a tu clave pública local
+ssh_key_name        = "nodos-key"
+ssh_public_key_path = "~/.ssh/id_ed25519.pub"
+
+# Flavor e imagen exactos (ver el README del 03 para consultar el catálogo).
+# c3-16 = 8 vCPU, 16 GB de RAM y 200 GB de disco raíz. Cada nodo es una
+# máquina de este tamaño: ojo con las cuotas del proyecto y con el coste
+# (n nodos = n veces el precio por hora).
+flavor_name = "c3-16"
+image_name  = "Ubuntu 26.04"
+
+# Backup automático (snapshot) del disco raíz de CADA instancia. Se factura
+# por GB y por nodo. OJO: activarlo o desactivarlo sobre instancias ya
+# creadas las RECREA.
+backup_enabled  = false
+backup_cron     = "0 3 * * *" # todos los días a las 03:00
+backup_rotation = 7           # backups que se conservan por instancia

@@ -1,0 +1,15 @@
+# Las 4 primeras variables (endpoint y credenciales) se pueden omitir si se
+# exportan como OVH_ENDPOINT, OVH_APPLICATION_KEY, OVH_APPLICATION_SECRET y
+# OVH_CONSUMER_KEY: el provider las lee del entorno.
+
+# Endpoint de la API de OVH. Para cuentas de ovh.com (Europa) usar "ovh-eu".
+# Otros valores posibles: "ovh-us", "ovh-ca", "soyoustart-eu", "kimsufi-eu"...
+ovh_endpoint = "ovh-eu"
+
+# Credenciales de la aplicación OVH API (ver README para generarlas)
+ovh_application_key    = "APPLICATION_KEY"
+ovh_application_secret = "APPLICATION_SECRET"
+ovh_consumer_key       = "CONSUMER_KEY"
+
+# Identificador (service_name) del proyecto Public Cloud
+ovh_public_cloud_project_id = "PROJECT_ID"

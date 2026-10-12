@@ -1,0 +1,63 @@
+#cloud-config
+# Plantilla de cloud-init (Terraform la renderiza con templatefile).
+# Primer arranque: instala nginx y publica una página index.html que
+# identifica el despliegue, para comprobar a simple vista que la máquina
+# la hemos desplegado nosotros con Terraform. Se sirve desde /var/www/html,
+# que está en el disco raíz de 200 GB (no hay volumen aparte).
+
+package_update: true
+packages:
+  - nginx
+%{ if certbot_email != "" ~}
+  - certbot
+  - python3-certbot-nginx
+%{ endif ~}
+
+write_files:
+  # defer: true -> se escribe al final, después de instalar nginx, para que
+  # no se adelante a la creación de /var/www/html por el paquete
+  - path: /var/www/html/index.html
+    defer: true
+    permissions: "0644"
+    content: |
+      <!DOCTYPE html>
+      <html lang="es">
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>${fqdn} · desplegado con Terraform</title>
+        <style>
+          body { font-family: system-ui, sans-serif; max-width: 40rem; margin: 3rem auto; padding: 0 1rem; line-height: 1.5; }
+          code { background: #eee; padding: .1rem .35rem; border-radius: 4px; }
+          @media (prefers-color-scheme: dark) { body { background: #111; color: #eee; } code { background: #333; } }
+        </style>
+      </head>
+      <body>
+        <h1>${fqdn}</h1>
+        <p>Esta máquina la hemos desplegado nosotros con <strong>Terraform</strong>
+        y <strong>cloud-init</strong> en OVH Public Cloud.</p>
+        <ul>
+          <li>Instancia: <code>${instance_name}</code></li>
+          <li>Flavor: <code>${flavor_name}</code></li>
+          <li>Desplegada: <code>@@FECHA@@</code></li>
+        </ul>
+      </body>
+      </html>
+%{ if certbot_email != "" ~}
+  # Script que pide el certificado TLS (ver obtener-certificado.sh)
+  - path: /usr/local/sbin/obtener-certificado.sh
+    defer: true
+    permissions: "0755"
+    content: |
+      ${indent(6, certbot_script)}
+%{ endif ~}
+
+runcmd:
+  # Sustituye el marcador por la fecha real del primer arranque. Va como
+  # cadena (no como lista) para que la ejecute un shell y expanda $(date).
+  - sed -i "s/@@FECHA@@/$(date -Is)/" /var/www/html/index.html
+%{ if certbot_email != "" ~}
+  # En segundo plano: espera a que el DNS resuelva antes de pedir el
+  # certificado, y no debe bloquear el arranque
+  - [systemd-run, --unit=obtener-certificado, --no-block, /usr/local/sbin/obtener-certificado.sh, "${fqdn}", "${certbot_email}", "${certbot_staging}"]
+%{ endif ~}

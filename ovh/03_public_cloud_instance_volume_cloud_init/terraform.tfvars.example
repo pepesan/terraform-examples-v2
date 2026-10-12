@@ -1,0 +1,85 @@
+# Las 4 primeras variables (endpoint y credenciales) se pueden omitir si se
+# exportan como OVH_ENDPOINT, OVH_APPLICATION_KEY, OVH_APPLICATION_SECRET y
+# OVH_CONSUMER_KEY: el provider las lee del entorno.
+
+# Endpoint de la API de OVH. Para cuentas de ovh.com (Europa) usar "ovh-eu".
+ovh_endpoint = "ovh-eu"
+
+# Credenciales de la aplicación OVH API. El token necesita permisos sobre
+# /cloud/project/* (los mismos que en 01_provider_config, no hacen falta
+# permisos nuevos)
+ovh_application_key    = "APPLICATION_KEY"
+ovh_application_secret = "APPLICATION_SECRET"
+ovh_consumer_key       = "CONSUMER_KEY"
+
+# Identificador del proyecto Public Cloud (ver README general de ovh)
+ovh_public_cloud_project_id = "PROJECT_ID"
+
+# Región donde crear la instancia.
+#
+# Regiones Public Cloud reales disponibles en este proyecto (comprobado
+# con el ejemplo 01_provider_config, output "available_regions" —
+# ejecuta `terraform output available_regions` ahí para refrescar la
+# lista si cambia):
+#   BHS, BHS5             -> Beauharnois (Canadá)
+#   CA-EAST-TOR           -> Toronto (Canadá)
+#   DE, DE1               -> Frankfurt (Alemania)
+#   EU-SOUTH-MIL          -> Milán (Italia)
+#   EU-WEST-PAR           -> París (Francia)
+#   GRA, GRA11            -> Gravelines (Francia)   <- la usada por defecto aquí
+#   RBX, RBX-A, RBX-ARCHIVE -> Roubaix (Francia)
+#   SBG, SBG5             -> Estrasburgo (Francia)
+#   UK, UK1               -> Londres (Reino Unido)
+#   WAW, WAW1             -> Varsovia (Polonia)
+#
+# El catálogo de flavors/imágenes (más abajo) es distinto por región: si
+# cambias esta variable, vuelve a comprobar los valores de "flavor_name"/
+# "image_name" para la nueva región con el método del README (el mismo
+# snippet de ahí acepta un "region" distinto en su propio tfvars/-var).
+region = "GRA11"
+
+# Nombre de la instancia
+instance_name = "valinor"
+
+# Ruta a tu clave pública SSH local
+ssh_public_key_path = "~/.ssh/id_ed25519.pub"
+
+# Flavor e imagen exactos a usar (ver README: cómo consultar el
+# catálogo real de tu región para confirmar/ajustar estos valores).
+#
+# Flavors reales disponibles en GRA11 con 4 vCPU (comprobado en esta
+# cuenta/región; otras regiones/cuentas pueden variar):
+#   c3-8    -> 4 vCPU,  8GB RAM, 100GB disco (el usado por defecto aquí)
+#   b2-15   -> 4 vCPU, 15GB RAM, 100GB disco
+#   c2-15   -> 4 vCPU, 15GB RAM, 100GB disco
+#   b3-16   -> 4 vCPU, 16GB RAM, 100GB disco
+#   r3-32   -> 4 vCPU, 32GB RAM, 100GB disco
+#   r2-60   -> 4 vCPU, 60GB RAM, 100GB disco
+#   d2-8    -> 4 vCPU,  8GB RAM,  50GB disco (gama "discovery", más barata)
+#   c3-8-flex / b2-15-flex / etc. -> igual que su versión sin "-flex" pero
+#     con 50GB de disco y billing_period más flexible
+#   (hay además variantes "win-*" equivalentes para Windows, no aplican aquí)
+flavor_name = "c3-8"
+
+# Imágenes Linux reales disponibles (comprobado en esta cuenta/región):
+#   Ubuntu 22.04
+#   Ubuntu 22.04 - UEFI
+#   Ubuntu 24.04
+#   Ubuntu 24.04 - UEFI
+#   Ubuntu 24.04 - NVIDIA - v580
+#   Ubuntu 26.04               <- la usada por defecto aquí
+#   Ubuntu 26.04 - UEFI
+#   Ubuntu 26.04 - NVIDIA - Latest
+#   Ubuntu 26.04 - NVIDIA - v595
+image_name = "Ubuntu 26.04"
+
+
+volume_type="high-speed"
+
+# Backup automático (snapshot) del disco raíz de la instancia. No incluye el
+# volumen adicional. OJO: activarlo o desactivarlo sobre una instancia ya
+# creada la RECREA (y el volumen pierde sus datos). Los snapshots se
+# facturan por GB.
+backup_enabled  = false
+backup_cron     = "0 3 * * *" # todos los días a las 03:00
+backup_rotation = 7           # backups que se conservan

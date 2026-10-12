@@ -1,0 +1,25 @@
+#cloud-config
+# Plantilla de cloud-init (Terraform la renderiza con templatefile).
+# Instala nginx y deja el disco adicional montado en ${mount_point},
+# que es el directorio donde nginx sirve las páginas web por defecto.
+#
+# El script de montaje vive en montar-datos.sh y se incrusta aquí con
+# indent() para que quede dentro del bloque YAML.
+#
+# Por qué un script con espera y no fs_setup/mounts de cloud-init: el
+# volumen se crea y se conecta DESPUÉS de la instancia, así que en el primer
+# arranque el disco puede no existir todavía. cloud-init no reintenta.
+
+package_update: true
+packages:
+  - nginx
+
+write_files:
+  - path: /usr/local/sbin/montar-datos.sh
+    permissions: "0755"
+    content: |
+      ${indent(6, script)}
+
+runcmd:
+  # En segundo plano: no bloquea el arranque mientras espera al disco
+  - [systemd-run, --unit=montar-datos, --no-block, /usr/local/sbin/montar-datos.sh, "${mount_point}"]

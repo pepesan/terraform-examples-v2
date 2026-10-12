@@ -1,0 +1,4 @@
+PLAN.md
+*.log
+.terraform
+terraform.tfstate*

@@ -1,0 +1,10 @@
+terraform.tfstate.lock.info
+terraform.tfstate
+terraform.tfstate.*.backup
+terraform.tfstate.backup
+terraform.tfvars
+.terraform
+PLAN.md
+*.log
+# El lock file SI se versiona: fija las versiones exactas del provider
+!.terraform.lock.hcl

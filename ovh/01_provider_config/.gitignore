@@ -1,0 +1,6 @@
+terraform.tfstate.lock.info
+terraform.tfstate
+terraform.tfvars
+.terraform
+# El lock file SI se versiona: fija las versiones exactas del provider
+!.terraform.lock.hcl

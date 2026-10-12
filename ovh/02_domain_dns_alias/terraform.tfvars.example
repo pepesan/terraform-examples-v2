@@ -1,0 +1,21 @@
+# Las 4 primeras variables (endpoint y credenciales) se pueden omitir si se
+# exportan como OVH_ENDPOINT, OVH_APPLICATION_KEY, OVH_APPLICATION_SECRET y
+# OVH_CONSUMER_KEY: el provider las lee del entorno.
+
+# Endpoint de la API de OVH. Para cuentas de ovh.com (Europa) usar "ovh-eu".
+ovh_endpoint = "ovh-eu"
+
+# Credenciales de la aplicación OVH API. El token necesita permisos sobre
+# /domain/zone/* (ver README general de ovh)
+ovh_application_key    = "APPLICATION_KEY"
+ovh_application_secret = "APPLICATION_SECRET"
+ovh_consumer_key       = "CONSUMER_KEY"
+
+# Dominio ya dado de alta en tu cuenta OVH
+domain = "ejemplo.com"
+
+# Nombre de máquina al que se le crea el registro A (p. ej. valinor.ejemplo.com)
+hostname = "valinor"
+
+# IP del servidor al que apuntará el registro A
+server_ip = "X.X.X.X"
